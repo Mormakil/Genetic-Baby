@@ -14,4 +14,13 @@ def quellepression
      return @pression
 end
 
+def existehepatomegalie
+	return (hepatomegalie == 1)
+end
+
+def get_binding
+	return binding()	
+end
+
+
 end
