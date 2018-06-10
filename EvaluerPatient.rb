@@ -22,24 +22,29 @@ def hepatorandom
 	rand(0..1)
 end
 
-tabpatient = Array.new(100) { |i|
-	tabpatient[i] = Patient.new(agerandom,pressionrandom,hepatorandom)  }
+i= 0
+
+tabpatient = Array.new(100) 
+
+0.upto 99 do |i|
+	tabpatient[i] = Patient.new(agerandom,pressionrandom,hepatorandom)
+	i += 1
+end
+	
 
 
 # Evaluer cet ensemble de patients random
 # Mettre les résultats dans un fichier texte
 
-def mafonction
+mafonction = "if (((@age * 1.5 + 45) > @pression) && not(@hepatomegalie)) then 'true'  else 'false' end"
 
 0.upto 99 do |i|
 	b = tabpatient[i].get_binding
 	resultat = eval(mafonction,b)
 	puts resultat
+	i += 1
 end
 
-print patientcourant.quelage
-print '\n'
-commande = File.open('fonction.txt').gets
-print(eval(commande))
+
 
 
