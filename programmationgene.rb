@@ -21,20 +21,36 @@ end
 def comparerResultatProgrammeClinique(resultatprog,resultatclinique,prog)
 end
 
-def fitness(prog,ensemblepatient)
+def calculerScore(prog,fit)
+	b = prog.get_binding
+	prog.ecrirescore(eval(fit,b)) 
+end
+
+######################################################
+# THE fonction fitness                               #
+# Prend un prog de classe Programmme                 #
+# et un ensemble de patient                          #
+# Evalue avec le programme chaque patient            #
+# Indique si vrai, faux positif ...                  #
+# Puis attribue un score de réussite au programme    #
+# Selon le calcul donné par fonctionscorefit         #
+######################################################
+
+def fitness(prog,ensemblepatient,fonctionscorefit)
 
 # variables locales
 nombrepatient = sizeof(ensemblepatient)
 
 # on boucle en evaluant chaque patient par le programme
 # passé en paramètre
-
 0.upto nombrepatient do |i| {
 	patientactuel = ensemblepatient[i].get_binding
 	resultat = eval(prog,patientactuel)
 	comparerResultatProgrammeClinique(resultat,ensemblepatient[i].@resultat,prog)
 }
 
+# on calcule le score du programme
+calculerScore(prog,fonctionscorefit)
 end
 
 ################ Ici débute le "main" ###############
