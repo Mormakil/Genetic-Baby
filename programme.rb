@@ -1,7 +1,48 @@
+require_relative "patient"
+
 class Programme
 
-def initialize()
+def initialize(prog,version,classement)
+	@prog = prog
+	@nbpatientstestes = 0.0
+	@nbpatientsok = 0 .0
+	@tauxpatientsok = 0.0
+	@nbfauxnegatifs = 0.0
+	@score = 0.0
+	@idprogramme = {version,classement}
+end
 
+def ecrireScore(score)
+	@score = score
+end
+
+def ecrirenbPatientTestes(nbpatient)
+	@nbpatientstestes = nbpatient
+end
+
+def increasePatientTestes
+	@nbpatientstestes += 1
+end
+
+def increasePatientOk
+	@nbpatientsok += 1
+end
+
+def calculetauxPatientOk
+#	@tauxpatientsok = (@nbpatientsok / @nbpatientstestes)
+end
+
+def ecrireFichierResultat(fichier)
+	fichier.print("******************************")
+	fichier.print("Resultat du programme : " + @idprogramme)
+	fichier.print("Fonction : " + @prog)
+	fichier.print("Score donné par la fonction fitness: " + @score)
+end
+
+def evaluerMonPatient(monpatient)
+	b = monpatient.get_binding
+	resultat = eval(@prog,b)
+	return resultat
 end
 
 end

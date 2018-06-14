@@ -34,23 +34,27 @@ end
 # Indique si vrai, faux positif ...                  #
 # Puis attribue un score de réussite au programme    #
 # Selon le calcul donné par fonctionscorefit         #
+# Penser à écrire dans un fichier log pour chaque    #
+# programme et pour chaque patient                   #
 ######################################################
 
-def fitness(prog,ensemblepatient,fonctionscorefit)
+def fitness(prog,ensemblepatient,fonctionscorefit,cheminfichierlog)
 
 # variables locales
-nombrepatient = sizeof(ensemblepatient)
+	nombrepatient = sizeof(ensemblepatient)
+	log = File.open("cheminfichierlog", "w+")
+	
 
 # on boucle en evaluant chaque patient par le programme
 # passé en paramètre
-0.upto nombrepatient do |i| {
-	patientactuel = ensemblepatient[i].get_binding
-	resultat = eval(prog,patientactuel)
-	comparerResultatProgrammeClinique(resultat,ensemblepatient[i].@resultat,prog)
-}
+	0.upto nombrepatient do |i| {
+		patientactuel = ensemblepatient[i].get_binding
+		resultat = eval(prog,patientactuel)
+		comparerResultatProgrammeClinique(resultat,ensemblepatient[i].@resultat,prog)
+	}
 
 # on calcule le score du programme
-calculerScore(prog,fonctionscorefit)
+	calculerScore(prog,fonctionscorefit)
 end
 
 ################ Ici débute le "main" ###############
