@@ -85,7 +85,7 @@ nbgene = Integer(gets)
 puts "Taille de la population ? \n"
 taillepopu = Integer(gets)
 
-mapopulation = Population.new(10,taillepopu,mesterminaux,mesoperateurs)
+mapopulation = Population.new(nbpatients,taillepopu,mesterminaux,mesoperateurs,nbgene)
 
 ################ Ici débute le "main" ###############
 # On lance l'algo pour obtenir l'alfa programme   ###
@@ -104,7 +104,39 @@ log.print("Nombre de générations maximales : "+ String(nbgene) + " \n")
 log.print("Nombre de patients testés à chaque génération : ")
 log.print(nbpatients)
 log.print("\n")
+
+
+#------ Fin Init du log ---------#
+
+###################################################
+# La population est crée, les patients sont dispos#
+# On peut enfin faire tourner et générer des      #
+# fonctions. Que la meilleure gagne               #
+###################################################
+
+# on génère
+# mapopulation.genererPopulation(i,mode,log)
+
+# on fit
+mapopulation.fitness(tabpatient,nil)
+
+#  on trie
+# mapopulation.sort
+
+# on logge
 mapopulation.decrirepopulation(log)
+
+# on continue si on n'atteint pas le nombre de générations maximales
+# ou si le cut-off de fit est atteint
+
+# while cutoff or geneact < maxgene
+
+
+#----------- on finit le log ------------------#
+
+log.print(" L'élu est : \n")
+# On sauve le meilleur
+mapopulation.inscritElu(log)
 log.print("-------------------------------------------------\n")
 log.print("                   Fin                           \n")
 log.print("-------------------------------------------------\n")
@@ -112,25 +144,4 @@ log.print("-------------------------------------------------\n")
 log.close
 
 
-=begin
-
-patient1 = Patient.new(14,80,1)
-patient2 = Patient.new(8,50,0)
-
-p=patient1
-b = p.get_binding
-s = "if (((@age * 1.5 + 45) > @pression) && not(@hepatomegalie)) then 'true'  else 'false' end"
-eval(s,b)
-resultat = eval(s,b)
-puts "pour le patient 1"
-puts resultat
-
-p=patient2
-b = p.get_binding
-resultat = eval(s,b)
-
-puts "pour le patient 2"
-puts resultat
-
-=end
-
+################################THE END#################################

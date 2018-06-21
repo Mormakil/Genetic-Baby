@@ -4,17 +4,18 @@ require_relative "programme"
 class Population 
 
 
-def initialize(nbpatient,taillepopulation, ensembleterminaux, ensembleoperateurs)
+def initialize(nbpatient,taillepopulation, ensembleterminaux, ensembleoperateurs,nbmaxgenerations)
 	@nbpatient = nbpatient
+	@nbmaxgenerations = nbmaxgenerations
 	@taillepopulation = taillepopulation
 	@ensembleterminaux = ensembleterminaux
 	@ensembleoperateurs = ensembleoperateurs
-	@niemegeneration = 0
-	@tableaupopulation = Array.new(taillepopulation) { |i|  }
+	@niemegeneration = 1
+	@tableaupopulation = Array.new(taillepopulation)
 	
 	# on crée l'ensemble prêt à recevoir chaque programme
 	0.upto (taillepopulation -1) do |i|
-		generationSpontanee(0,0,i)
+		generationSpontanee(@niemegeneration,i + 1,i)
 		i += 1
 	end
 
@@ -38,84 +39,112 @@ def crossmatch(prog1,prog2)
 end
 
 # génère une population
-# A n0, la population est générée aléatoirement
-# A n>0, on génère en fonction de règles bien précises (tournoi, sélection, random)
-def genererPopulation(niemegeneration,taillepopulation,population)
+# A n1, la population est générée aléatoirement
+# A n>1, on génère en fonction de règles bien précises (tournoi, sélection, random)
+def genererPopulation(niemegeneration,mode,fichier)
+	if @niemegeneration ==1 
+		fichier.print("et c'est parti \n")
+	else
+		# ici c'est parti pour la génération en nieme génération
+	end
 end
 
 # comparer la décision du programme et celle clinique et classe
 # dans la classe Programme en vrai positif, faux négatifs ...
-def comparerResultatProgrammeClinique(resultatprog,resultatclinique,prog)
+def comparerResultatProgrammeClinique(resultatprog,resultatclinique,niemeprog)
 end
 
-def affichergeneration
+def donnerIndividu(i)
+	return @tableaupopulation[i]
+end
+
+def afficherGeneration
 	puts @niemegeneration
 end
 
-def donnergeneration
+def donnerGeneration
 	return @niemegeneration
 end
 
-def donnertaillepopulation
+def donnerTaillePopulation
 	return @taillepopulation
+end
+
+def inscritElu(fichier)
+	fichier.print("prout\n")
+end
+
+def affichelelu
+	#gnagna
+end
+
+def sauvelelu
+	puts "dans un fichier oh oh\n"
+	puts "de Dana lalilala \n"
+	puts "j'ai sauvé l'élu  \n"
+	puts " (en fait c'est elected.txt) \n"
 end
 
 def decrirepopulation(fichier)
 	fichier.print("********************************\n")
-	fichier.print("Ceci est la génération n° : " + String(donnergeneration) + "\n")
+	fichier.print("Ceci est la génération n° : " + String(donnerGeneration) + "\n")
 	fichier.print("Nos opérateurs : \n")
 	fichier.print(@mesoperateurs)
 	fichier.print("\n")
 	fichier.print("Nos terminaux : \n")
 	fichier.print(@mesterminaux)
 	fichier.print("\n")
-	fichier.print("Taille de la population : " + String(donnertaillepopulation) + "\n")
+	fichier.print("Taille de la population : " + String(donnerTaillePopulation) + "\n")
 	fichier.print("Notre fonction fitness : \n")
 	0.upto (@taillepopulation -1) do |i|
-		fichier.print("programme n° " + String(i) + " \n")
+		fichier.print("programme classé° " + String(i) + " \n")
+		#fichier.print("programme id " + String(i) + " \n")
 		fichier.print(@tableaupopulation[i].donnerprogramme)
 		fichier.print("\n")
 	end
 end
 
-=begin
-
-def calculerScore(prog,fit)
-	b = prog.get_binding
-	prog.ecrirescore(eval(fit,b)) 
-end
 
 ######################################################
 # THE fonction fitness                               #
-# Prend un prog de classe Programmme                 #
+# Prend un ensemble de programmes                    #
+# de classe Programmme                               #
 # et un ensemble de patient                          #
-# Evalue avec le programme chaque patient            #
+# Evalue avec les programmes chaque patient          #
 # Indique si vrai, faux positif ...                  #
-# Puis attribue un score de réussite au programme    #
+# Puis attribue un score de réussite aux programmes  #
 # Selon le calcul donné par fonctionscorefit         #
 # Penser à écrire dans un fichier log pour chaque    #
 # programme et pour chaque patient                   #
 ######################################################
 
-def fitness(prog,ensemblepatient,fonctionscorefit,cheminfichierlog)
+def fitness(ensemblepatient,fonctionscorefit)
 
 # variables locales
-	nombrepatient = sizeof(ensemblepatient)
-	log = File.open("cheminfichierlog", "w+")
 	
-
+	
 # on boucle en evaluant chaque patient par le programme
 # passé en paramètre
-	0.upto nombrepatient do |i| {
-		patientactuel = ensemblepatient[i].get_binding
-		resultat = eval(prog,patientactuel)
-		comparerResultatProgrammeClinique(resultat,ensemblepatient[i].@resultat,prog)
-	}
+	0.upto ((donnerTaillePopulation) -1) do |i|
+		#monindividu = donnerIndividu(i) #ici donner l'adresse pour pouvoir effectuer les modifs
+		0.upto (@nbpatient -1) do |j|
+			resultat = @tableaupopulation[i].evaluerMonPatient(ensemblepatient[j])
+			# ici comparer prono réel patient et resultat obtenu
+			puts "pour le patient" + String(j) + " le programme "
+			@tableaupopulation[i].afficherId 
+			puts " a trouvé : "
+			puts resultat
+			puts "\n"
+			j += 1	
+		end
+	
+		i+=1	
+	end
 
 # on calcule le score du programme
-	calculerScore(prog,fonctionscorefit)
+#	calculerScore(prog,fonctionscorefit)
 end
 
-=end
+#------- fin de la classe --------#
 
 end
