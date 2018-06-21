@@ -5,11 +5,19 @@ class Programme
 def initialize(prog,version,classement)
 	@prog = prog
 	@nbpatientstestes = 0.0
-	@nbpatientsok = 0 .0
+	@nbpatientsok = 0.0
 	@tauxpatientsok = 0.0
 	@nbfauxnegatifs = 0.0
 	@score = 0.0
-	@idprogramme = {version,classement}
+	@idprogramme = [version,classement]
+end
+
+def donnerprogramme
+	return @prog
+end
+
+def afficherprogramme
+	puts @prog
 end
 
 def ecrireScore(score)
