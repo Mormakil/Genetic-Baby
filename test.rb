@@ -3,10 +3,6 @@ require_relative "programme"
 require_relative "programmationgene"
 
 
-nbgene = 0
-taillepopu = 0
-nbpatients = 0
-
 def agerandom
 	rand(14..20)
 end
@@ -32,11 +28,8 @@ begin
    	end
 rescue
 		puts "operateurs.gb not found"
-      	mesoperateurs = ['+','-','<','>','*']
 end
-print mesoperateurs
-
-
+print Population.operateurs
 
 
 begin
@@ -47,9 +40,8 @@ begin
    	end
 rescue
 		puts "terminaux.gb not found"
-      	mesterminaux = [65,1]
 end
-print mesterminaux
+print Population.terminaux
 
 ###################################################################################
 #                            Ici on créée                                      ####
@@ -67,7 +59,7 @@ rescue
 		puts "we create random patients \n"
       	
       	tabpatient = Array.new(100)
-      	nbpatients = 100
+      	Population.ecrire_nbpatients(100)
       	
       	0.upto 99 do |i|
 			tabpatient[i] = Patient.new(agerandom,pressionrandom,hepatorandom)
@@ -80,12 +72,12 @@ notredate = Time.now
 puts notredate
 
 puts "Nombre de générations ? \n"
-nbgene = Integer(gets)
+Population.ecrire_nbgene
 
 puts "Taille de la population ? \n"
-taillepopu = Integer(gets)
+Population.ecrire_taillepopu
 
-mapopulation = Population.new(nbpatients,taillepopu,mesterminaux,mesoperateurs,nbgene)
+mapopulation = Population.new
 
 ################ Ici débute le "main" ###############
 # On lance l'algo pour obtenir l'alfa programme   ###
@@ -100,9 +92,9 @@ log = File.open("log.txt","a")
 
 log.print(notredate)
 log.print("\n")
-log.print("Nombre de générations maximales : "+ String(nbgene) + " \n")
+log.print("Nombre de générations maximales : "+ String(Population.nbgene) + " \n")
 log.print("Nombre de patients testés à chaque génération : ")
-log.print(nbpatients)
+log.print(Population.nbpatients)
 log.print("\n")
 
 
