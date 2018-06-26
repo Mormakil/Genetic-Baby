@@ -42,7 +42,7 @@ class Tree
                @fils[0].parser + self.valeur
           when 2 #comparaison, opérations arithmétiques ... il faut blinder avec les parenthèses
                "(" + @fils[0].parser + self.valeur + @fils[1].parser + ")"
-          when 3 #cas du if then else principalement
+          when 3 #cas du if then else principalement (à écrire)
           "You passed a string"
           else
           "You gave me #{x} -- I have no idea what to do with that."
