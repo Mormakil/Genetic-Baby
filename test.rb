@@ -2,24 +2,9 @@ require_relative "patient"
 require_relative "programme"
 require_relative "programmationgene"
 
-
-def agerandom
-	rand(14..20)
-end
-
-def pressionrandom
-	rand(50..110)
-end
-
-def hepatorandom
-	rand(0..1)
-end
-
-
 puts "Hi Master\n"
 
 #on récupère les terminaux, les opérateurs contenus dans les fichiers txt
-
 begin
 	operateurs = File.open("operateurs.gb","r")
 	if operateurs
@@ -30,7 +15,6 @@ rescue
 		puts "operateurs.gb not found"
 end
 print Population.operateurs
-
 
 begin
 	terminaux = File.open("terminaux.gb","r")
@@ -48,24 +32,8 @@ print Population.terminaux
 # Une base de patients prêts à être passé en paramètre des différents          ####
 # programmes composant la population pour évaluer le meilleure d'entre eux     ####
 ###################################################################################
-begin
-	patients = File.open("patients.csv","r")
-	if patients
-      	puts "patients.csv opened successfully"
-
-   	end
-rescue
-		puts "patients.csv not found\n"
-		puts "we create random patients \n"
-      	
-      	tabpatient = Array.new(100)
-      	Population.ecrire_nbpatients(100)
-      	
-      	0.upto 99 do |i|
-			tabpatient[i] = Patient.new(agerandom,pressionrandom,hepatorandom)
-			i += 1
-		end
-end
+tabpatient = Patient.lireCsv("patients2.csv")
+Population.ecrire_nbpatients(tabpatient.size)
 ####################################################################################
 
 notredate = Time.now
