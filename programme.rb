@@ -2,6 +2,8 @@ require_relative "patient"
 
 class Programme
 
+attr_reader :idprogramme
+
 def initialize(prog,version,classement)
 	@prog = prog
 	@nbpatientstestes = 0
@@ -20,9 +22,8 @@ def afficherprogramme
 	puts @prog
 end
 
-def afficherId
-	puts @idprogramme[0]
-	puts @idprogramme[1]
+def donnererIdClassement
+	@idprogramme[1]
 end
 
 def ecrireScore(score)
