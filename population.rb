@@ -1,5 +1,6 @@
 require_relative "patient"
 require_relative "programme"
+require_relative "operateur"
 
 class Population
 	
@@ -7,7 +8,7 @@ class Population
 	@@taillepopu = 0
 	@@nbpatients = 0
 	@@terminaux = [65,1]
-	@@operateurs = ['+','-','<','>','*']
+	@@operateurs = nil
 	
 	def self.ecrire_nbgene
 		@@nbgene = Integer(gets)
@@ -25,7 +26,7 @@ class Population
 		@@terminaux = terminaux
 	end
 	
-	def self.ecrire_operateurs(operateurs)
+	def Population.ecrire_operateurs(operateurs)
 		@@operateurs = operateurs
 	end
   
@@ -51,27 +52,29 @@ class Population
 	
 	attr_accessor :niemegeneration
 	
-	def initialize
-		@niemegeneration = 1
+	def initialize(numerogeneration)
+		@niemegeneration = numerogeneration
 		@tableaupopulation = Array.new(Population.taillepopu)
 		
 		# on crée l'ensemble prêt à recevoir chaque programme
 		0.upto ((Population.taillepopu) -1) do |i|
-			generationSpontanee(@niemegeneration,i + 1,i)
+			@tableaupopulation[i] = Programme.new(Tree.new(nil),numerogeneration,i)
 			i += 1
 		end
 	
 	end
 	
-	def generationSpontanee(version,classement,placetableau)
+	def premiereGeneration(profondeur)
 		# je cree un programme aléatoirement
 		# version = génération à laquelle le programme est créé
 		# classement = par défaut le moins bon
 		# prog = génération aléatoire avec les terminaux et les opérateurs
 		# se pose la question arbre, s-expression, ou string toute faite
 		# pour l'instant, string toute faite
-		prog = "if (((self.age * 1.5 + 45) > self.pression) && not(self.existeHepatomegalie)) then 'true'  else 'false' end"
-		@tableaupopulation[placetableau] = Programme.new(prog, version, classement)
+		0.upto ((Population.taillepopu) -1) do |i|
+			@tableaupopulation[i].generationSpontanee(1,profondeur,Population.operateurs,Population.terminaux)
+			i += 1
+		end
 	end
 	
 	def mutation(prog)
@@ -126,9 +129,7 @@ class Population
 	def decrirepopulation(fichier)
 		fichier.print("********************************\n")
 		fichier.print("Ceci est la génération n° : " + String(donnerGeneration) + "\n")
-		fichier.print("Nos opérateurs : \n")
-		fichier.print(Population.operateurs)
-		fichier.print("\n")
+		Population.operateurs.afficherValeurs(fichier)
 		fichier.print("Nos terminaux : \n")
 		fichier.print(Population.terminaux)
 		fichier.print("\n")
@@ -160,7 +161,7 @@ class Population
 	
 	# variables locales
 		
-	prout = File.open("prout.txt","a")	
+	#prout = File.open("fitness.txt","a")	
 	# on boucle en evaluant chaque patient par le programme
 	# passé en paramètre
 		
@@ -168,19 +169,7 @@ class Population
 			#Insert Multithreading here
 			individu = @tableaupopulation[i]
 			Thread.new {
-				0.upto ((Population.nbpatients) -1) do |j|
-					resultat = individu.evaluerMonPatient(ensemblepatient[j])
-					prout.print("Le programme ")
-					prout.print(individu)
-					prout.print("a trouvé : ")
-					prout.print(resultat)
-					prout.print("pour le patient ")
-					prout.print(j)
-					prout.print("\n)")
-					# ici comparer prono réel patient et resultat obtenu
-					#puts "pour le patient" + String(j) + " le programme "
-					j += 1	
-				end
+				individu.EvaluerLesPatients(ensemblepatient)
 			}
 			i+=1
 			

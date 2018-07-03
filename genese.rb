@@ -1,20 +1,13 @@
 require_relative "patient"
 require_relative "programme"
 require_relative "population"
+require_relative "operateur"
 
 puts "Hi Master\n"
 
 #on récupère les terminaux, les opérateurs contenus dans les fichiers txt
-begin
-	operateurs = File.open("operateurs.gb","r")
-	if operateurs
-      	puts "operateurs.gb opened successfully"
-
-   	end
-rescue
-		puts "operateurs.gb not found"
-end
-print Population.operateurs
+Population.ecrire_operateurs(Operateurs.new("operateurs.csv"))
+Population.operateurs.afficherValeurs(STDOUT)
 
 begin
 	terminaux = File.open("terminaux.gb","r")
@@ -45,7 +38,7 @@ Population.ecrire_nbgene
 puts "Taille de la population ? \n"
 Population.ecrire_taillepopu
 
-mapopulation = Population.new
+mapopulation = Population.new(1)
 
 ################ Ici débute le "main" ###############
 # On lance l'algo pour obtenir l'alfa programme   ###
@@ -62,7 +55,8 @@ log.print(notredate)
 log.print("\n")
 log.print("Nombre de générations maximales : "+ String(Population.nbgene) + " \n")
 log.print("Nombre de patients testés à chaque génération : ")
-log.print(Population.nbpatients)
+log.puts(Population.nbpatients)
+Population.operateurs.afficherValeurs(log)
 log.print("\n")
 
 
@@ -76,6 +70,7 @@ log.print("\n")
 
 # on génère
 # mapopulation.genererPopulation(i,mode,log)
+mapopulation.premiereGeneration(2)
 
 # on fit : penser au multithreading
 mapopulation.fitness(tabpatient,nil)
