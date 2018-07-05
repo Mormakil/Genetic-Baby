@@ -9,23 +9,15 @@ puts "Hi Master\n"
 Population.ecrire_operateurs(Operateurs.new("operateurs.csv"))
 Population.operateurs.afficherValeurs(STDOUT)
 
-begin
-	terminaux = File.open("terminaux.gb","r")
-	if terminaux
-      	puts "terminaux.gb opened successfully"
-
-   	end
-rescue
-		puts "terminaux.gb not found"
-end
-print Population.terminaux
+Population.ecrire_terminaux(Terminaux.new("terminaux.csv"))
+Population.terminaux.afficherValeurs(STDOUT)
 
 ###################################################################################
 #                            Ici on créée                                      ####
 # Une base de patients prêts à être passé en paramètre des différents          ####
 # programmes composant la population pour évaluer le meilleure d'entre eux     ####
 ###################################################################################
-tabpatient = Patient.lireCsv("patients2.csv")
+tabpatient = Patient.lireCsv("patients3.csv")
 Population.ecrire_nbpatients(tabpatient.size)
 ####################################################################################
 
@@ -38,6 +30,9 @@ Population.ecrire_nbgene
 puts "Taille de la population ? \n"
 Population.ecrire_taillepopu
 
+##ici demander la taille de la fonction fitness
+Population.ecrireFonctionFitness("fitness.txt")
+
 mapopulation = Population.new(1)
 
 ################ Ici débute le "main" ###############
@@ -48,15 +43,16 @@ mapopulation = Population.new(1)
 
 #------ Init du Log -------------#
 
-log = File.open("log.txt","a")
+log = File.open("darwin.log","a")
 	
-
+notredate = Time.now
 log.print(notredate)
 log.print("\n")
 log.print("Nombre de générations maximales : "+ String(Population.nbgene) + " \n")
 log.print("Nombre de patients testés à chaque génération : ")
 log.puts(Population.nbpatients)
 Population.operateurs.afficherValeurs(log)
+Population.terminaux.afficherValeurs(log)
 log.print("\n")
 
 
@@ -70,10 +66,10 @@ log.print("\n")
 
 # on génère
 # mapopulation.genererPopulation(i,mode,log)
-mapopulation.premiereGeneration(2)
+mapopulation.premiereGeneration(2,"ramped")
 
 # on fit : penser au multithreading
-mapopulation.fitness(tabpatient,nil)
+mapopulation.fitness(tabpatient)
 
 #  on trie
 # mapopulation.sort

@@ -1,9 +1,11 @@
-require_relative "patient"
 require_relative "tree"
 
 class Programme
 	
 	attr_reader :idprogramme
+	attr_reader :nbpatientsok
+	attr_reader :nbpatientstestes
+	attr_accessor :score
 	
 	def initialize(arbre,version,classement)
 		@arbre = arbre
@@ -11,37 +13,61 @@ class Programme
 		@nbpatientsok = 0
 		@tauxpatientsok = 0.0
 		@nbfauxnegatifs = 0
+		@nbfauxpositifs = 0
+		@resultats = Array.new
 		@score = 0.0
-		@idprogramme = [version,classement]
+		@idprogramme = {"version" => version, "classement" => classement}
 	end
 	
-	def generationSpontanee(mode,profondeur,operateurs,terminaux)
+	def generationSpontaneeGrowth(mode,profondeur,operateurs,terminaux)
 		@arbre = Tree.new(nil)
 		Tree.genererArbreIncomplet(profondeur,operateurs,terminaux,@arbre)
 	end
 	
-	def donnerprogramme
-		return @arbre.parser
+	def generationSpontaneeFull(mode,profondeur,operateurs,terminaux)
+		@arbre = Tree.new(nil)
+		Tree.genererArbreComplet(profondeur,operateurs,terminaux,@arbre)
 	end
 	
-	def afficherprogramme
-		puts @arbre.parse
+	def generationSpontaneeRamped(mode,profondeur,operateurs,terminaux,i)
+		@arbre = Tree.new(nil)
+		if ((i % 2) == 0)
+			Tree.genererArbreComplet(profondeur,operateurs,terminaux,@arbre)
+		else
+			Tree.genererArbreIncomplet(profondeur,operateurs,terminaux,@arbre)
+		end
+	end
+	
+	def get_binding
+		return binding()
+	end
+	
+	def donnerprogramme
+		@arbre.parser
+	end
+	
+	def afficherprogramme(sortie)
+		sortie.puts(@arbre.parser)
 	end
 	
 	def donnererIdClassement
 		@idprogramme[1]
 	end
 	
-	def ecrireScore(score)
-		@score = score
-	end
-	
-	def ecrirenbPatientTestes(nbpatient)
+	def ecrireNbPatientsTestes(nbpatient)
 		@nbpatientstestes = nbpatient
 	end
 	
 	def increasePatientTestes
 		@nbpatientstestes += 1
+	end
+	
+	def increaseFauxNegatifs
+		@nbfauxnegatifs += 1
+	end
+	
+	def increaseFauxPositifs
+		@nbfauxpositifs += 1
 	end
 	
 	def increasePatientOk
@@ -52,11 +78,16 @@ class Programme
 	#	@tauxpatientsok = (@nbpatientsok / @nbpatientstestes)
 	end
 	
-	def ecrireFichierResultat(fichier)
-		fichier.print("******************************")
-		fichier.print("Resultat du programme : " + @idprogramme)
-		fichier.print("Fonction : " + @prog)
-		fichier.print("Score donné par la fonction fitness: " + @score)
+	def comparerResultats(res,respatient)
+		if res == respatient
+			increasePatientOk
+		else
+			if res > respatient #faux positif
+				increaseFauxPositifs
+			else
+				increaseFauxNegatifs
+			end
+		end
 	end
 	
 	def evaluerMonPatient(monpatient,monprog)
@@ -71,21 +102,30 @@ class Programme
 		n = (tabpatient.size) - 1
 		s = @arbre.parser
 		puts(s)
-		f = File.open("prout.txt","a")
 		0.upto n do |i|
-			resultat = evaluerMonPatient(tabpatient[i],s)
-			print("Le programme ")
-			print(i)
-			#print(self.idprogramme[1])
-			print("a trouvé : ")
-			print(resultat)
-			print("pour le patient ")
-			#print(tabpatient[i].id)
-			print("\n)")
-					# ici comparer prono réel patient et resultat obtenu
-					#puts "pour le patient" + String(j) + " le programme "
-			i += 1	
+			begin
+				resultat = evaluerMonPatient(tabpatient[i],s)
+			rescue ZeroDivisionError
+				resultat = 0
+			end
+			comparerResultats(resultat,tabpatient[i].resultat)
+			@resultats.push(resultat)
+			i += 1
+			increasePatientTestes
 		end
 	end
-
+	
+	def calculerScore(s)
+		b = get_binding
+		@score = eval(s,b)
+	end
+	
+	def ecrireFichierResultat(fichier)
+		fichier.puts("******************************")
+		fichier.puts("Resultat du programme : " + String(@idprogramme["version"]) + String(@idprogramme["classement"]))
+		fichier.puts("Fonction : " + @arbre.parser)
+		fichier.puts("Score donné par la fonction fitness: " + String(self.score))
+	end
+	
+##############Fin de Classe############
 end

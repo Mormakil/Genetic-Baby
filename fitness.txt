@@ -1,0 +1,1 @@
+self.nbpatientsok.to_f / self.nbpatientstestes.to_f

@@ -65,8 +65,8 @@ class Tree
      def Tree.genererArbreComplet(profondeur,operateurs,terminaux,arbre)
           if profondeur == 0
                # prendre au hasard un terminal
-               n = rand(0..(terminaux.size) -1)
-               arbre.valeur = String(terminaux[n])
+               n = rand(0..(terminaux.tableau.size) -1)
+               arbre.valeur = String(terminaux.tableau[n].valeur)
                # on est tout à la feuille, on ne relance pas en dessous
           else
                # prendre au hasard un opérateur
@@ -86,8 +86,8 @@ class Tree
           maprofondeur = rand(0..profondeurmax)
           if maprofondeur <= 0
                # prendre au hasard un terminal
-               n = rand(0..(terminaux.size) -1)
-               arbre.valeur = String(terminaux[n])
+               n = rand(0..(terminaux.tableau.size) -1)
+               arbre.valeur = String(terminaux.tableau[n].valeur)
                # on est tout à la feuille, on ne relance pas en dessous
           else
                # prendre au hasard un opérateur
@@ -111,7 +111,7 @@ class Tree
                          Tree.genererArbreIncomplet(maprofondeur,operateurs,terminaux,arbre.accesFils(i))
                     end
                else
-                    print "prout"
+                    raise "Le masque sur le nombre d'opérandes que prend l'opérateur n'est pas défini"
                end
           end
      end

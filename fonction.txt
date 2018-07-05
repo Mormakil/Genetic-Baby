@@ -1,1 +1,1 @@
-if (patientcourant.quellepression > 65) then true else false end 
+if (((self.age * 1.5 + 45) > self.pression) && not(self.hepatomegalie)) then 'true'  else 'false' end

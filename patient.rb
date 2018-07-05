@@ -1,27 +1,18 @@
 require "csv"
+
+
+#### La minimaliste classe patient ######
 class Patient
 
 	
 	####### 1 : les attributs, pour lire les données du patient #######
 	######## On ne modifie pas le données d'un patient          #######
-	attr_reader :age
-	attr_reader :pression
-	attr_reader :hepatomegalie
-	attr_reader :pressionmin
 	attr_reader :id
 	attr_reader :resultat
 	
-	def initialize (id,age,pression,hepatomegalie,result)
+	def initialize (id,result)
 		@id = id
-		@age = age
-		@pression = pression
-		@hepatomegalie = hepatomegalie
-		@pressionmin = 45 + pression * 1.5
 		@resultat = result
-	end
-	
-	def existeHepatomegalie
-		return (@hepatomegalie == 1)
 	end
 	
 	def get_binding
@@ -30,6 +21,63 @@ class Patient
 
 
 
+	####### 2 : méthode de classe pour lire un CSV #######
+	############### Prend un chemin en paramètre   #######
+	#### et renvoie un tableau de patients         #######
+	
+	def Patient.lireCsv(chemin)
+		begin
+			tabpatient = Array.new
+			CSV.foreach(chemin,{ encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all}) do |row|
+				
+				monhash = row.to_hash # il est bon, mon hash
+				tabpatient.push(Patient.new(monhash[:id],monhash[:resultat]))
+				puts(monhash[:age])
+			end
+			raise "File not found"
+			print(chemin)
+			puts " opened successfully \n"
+			puts "Patients loaded \n"
+		rescue
+			print(chemin)
+			puts ".csv not found\n"
+			puts "we create random patients \n"
+			tabpatient = Array.new(100)
+			0.upto 99 do |i|
+				tabpatient[i] = Patient.new(i,1)
+				i += 1
+			end
+		end
+		return tabpatient
+	end
+
+end
+
+########## Une sous-classe visant à évaluer le remplissage chez des patients ###########
+
+class Pressionpatient < Patient
+
+	
+	####### 1 : les attributs, pour lire les données du patient #######
+	######## On ne modifie pas le données d'un patient          #######
+	attr_reader :age
+	attr_reader :pression
+	attr_reader :hepatomegalie
+	attr_reader :pressionmin
+	
+	def initialize (id,age,pression,hepatomegalie,result)
+		super
+		@age = age
+		@pression = pression
+		@hepatomegalie = hepatomegalie
+		@pressionmin = 45 + pression * 1.5
+	end
+	
+	def existeHepatomegalie
+		return (@hepatomegalie == 1)
+	end
+	
+	
 	####### 2 : méthode de classe pour lire un CSV #######
 	############### Prend un chemin en paramètre   #######
 	#### et renvoie un tableau de patients         #######
@@ -46,18 +94,18 @@ class Patient
 		rand(0..1)
 	end
 	
-	def Patient.lireCsv(chemin)
+	def Pressionpatient.lireCsv(chemin)
 		begin
 			puts "on y est \n"
 			tabpatient = Array.new
 			CSV.foreach(chemin,{ encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all}) do |row|
 				
 				monhash = row.to_hash # il est bon, mon hash
-				tabpatient.push(Patient.new(monhash[:id],monhash[:age],monhash[:pression],monhash[:hepatomegalie],monhash[:resultat]))
+				tabpatient.push(Pressionpatient.new(monhash[:id],monhash[:age],monhash[:pression],monhash[:hepatomegalie],monhash[:resultat]))
 				puts(monhash[:age])
 			end
 			if tabpatient[0] != nil
-				puts "patients.csv opened successfully \n"
+				puts chemin + " opened successfully"
 				puts "array loaded \n"
 			end
 		rescue
@@ -65,11 +113,17 @@ class Patient
 			puts "we create random patients \n"
 			tabpatient = Array.new(100)
 			0.upto 99 do |i|
-				tabpatient[i] = Patient.new(i,agerandom,pressionrandom,hepatorandom,'true')
+				tabpatient[i] = Pressionpatient.new(i,agerandom,pressionrandom,hepatorandom,'true')
 				i += 1
 			end
 		end
 		return tabpatient
 	end
-
+################ Fin de Classe ##################@
 end
+
+
+
+
+
+#####################Fin de fichier###############@

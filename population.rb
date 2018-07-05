@@ -1,4 +1,3 @@
-require_relative "patient"
 require_relative "programme"
 require_relative "operateur"
 
@@ -9,6 +8,8 @@ class Population
 	@@nbpatients = 0
 	@@terminaux = [65,1]
 	@@operateurs = nil
+	@@foncfit =""
+	@@mode = {"full" => 'f', "growth" => 'g', "ramped" => 'r'}
 	
 	def self.ecrire_nbgene
 		@@nbgene = Integer(gets)
@@ -26,7 +27,7 @@ class Population
 		@@terminaux = terminaux
 	end
 	
-	def Population.ecrire_operateurs(operateurs)
+	def self.ecrire_operateurs(operateurs)
 		@@operateurs = operateurs
 	end
   
@@ -50,6 +51,24 @@ class Population
 		@@terminaux
 	end
 	
+	def self.ecrireFonctionFitness(chemin)
+		begin
+			fit = File.open(chemin,"r")	
+			raise "fitness.txt ne s'est pas ouvert"
+			@@foncfit = fit.gets
+		rescue
+			@@foncfit = "self.nbpatientsok.to_f / self.nbpatientstestes.to_f"
+		end
+	end
+	
+	def self.afficherFonctionFitness(fichier)
+		fichier.puts("Notre fonction fitness : " + @@foncfit)
+	end
+	
+	def self.donnerFonctionFitness
+		@@foncfit
+	end
+	
 	attr_accessor :niemegeneration
 	
 	def initialize(numerogeneration)
@@ -64,16 +83,28 @@ class Population
 	
 	end
 	
-	def premiereGeneration(profondeur)
-		# je cree un programme aléatoirement
-		# version = génération à laquelle le programme est créé
-		# classement = par défaut le moins bon
-		# prog = génération aléatoire avec les terminaux et les opérateurs
-		# se pose la question arbre, s-expression, ou string toute faite
-		# pour l'instant, string toute faite
-		0.upto ((Population.taillepopu) -1) do |i|
-			@tableaupopulation[i].generationSpontanee(1,profondeur,Population.operateurs,Population.terminaux)
-			i += 1
+	########## Cette première génération peut-être générée selon plusieurs modes #########
+	########## Growth : générations uniquement d'arbres incomplets #######################
+	########## Full : génération d'arbres complets uniquement ############################
+	########## Ramped half and half : un mix des deux, le plus commun ####################
+	
+	def premiereGeneration(profondeur,mode)
+		case mode
+		when 'f'	
+			0.upto ((Population.taillepopu) -1) do |i|
+				@tableaupopulation[i].generationSpontaneeFull(1,profondeur,Population.operateurs,Population.terminaux)
+				i += 1
+			end
+		when 'g'
+			0.upto ((Population.taillepopu) -1) do |i|
+				@tableaupopulation[i].generationSpontaneeGrowth(1,profondeur,Population.operateurs,Population.terminaux)
+				i += 1
+			end
+		else
+			0.upto ((Population.taillepopu) -1) do |i|
+				@tableaupopulation[i].generationSpontaneeRamped(1,profondeur,Population.operateurs,Population.terminaux,i)
+				i += 1
+			end
 		end
 	end
 	
@@ -94,21 +125,13 @@ class Population
 		end
 	end
 	
-	# comparer la décision du programme et celle clinique et classe
-	# dans la classe Programme en vrai positif, faux négatifs ...
-	def comparerResultatProgrammeClinique(resultatprog,resultatclinique,niemeprog)
-	end
 	
 	def donnerIndividu(i)
 		return @tableaupopulation[i]
 	end
 	
-	def afficherGeneration
-		puts @niemegeneration
-	end
-	
-	def donnerGeneration
-		return @niemegeneration
+	def afficherGeneration(fichier)
+		fichier.puts(@niemegeneration)
 	end
 	
 	def inscritElu(fichier)
@@ -119,27 +142,28 @@ class Population
 		#gnagna
 	end
 	
-	def sauvelelu
-		puts "dans un fichier oh oh\n"
-		puts "de Dana lalilala \n"
-		puts "j'ai sauvé l'élu  \n"
-		puts " (en fait c'est elected.txt) \n"
+	def sauvelelu(fichier)
+		fichier.puts "dans un fichier oh oh\n"
+		fichier.puts "de Dana lalilala \n"
+		fichier.puts "j'ai sauvé l'élu  \n"
 	end
 	
 	def decrirepopulation(fichier)
 		fichier.print("********************************\n")
-		fichier.print("Ceci est la génération n° : " + String(donnerGeneration) + "\n")
+		fichier.print("Ceci est la génération n° : " + String(self.niemegeneration) + "\n")
 		Population.operateurs.afficherValeurs(fichier)
-		fichier.print("Nos terminaux : \n")
-		fichier.print(Population.terminaux)
-		fichier.print("\n")
+		Population.terminaux.afficherValeurs(fichier)
 		fichier.print("Taille de la population : " + String(Population.taillepopu) + "\n")
-		fichier.print("Notre fonction fitness : \n")
+		Population.afficherFonctionFitness(fichier)
 		0.upto ((Population.taillepopu) -1) do |i|
 			fichier.print("programme classé° " + String(i) + " \n")
+			@tableaupopulation[i].ecrireFichierResultat(fichier)
 			#fichier.print("programme id " + String(i) + " \n")
-			fichier.print(@tableaupopulation[i].donnerprogramme)
-			fichier.print("\n")
+			#fichier.print(@tableaupopulation[i].donnerprogramme)
+			#fichier.print("\n")
+			#fichier.print("Il a trouvé " + String(@tableaupopulation[i].nbpatientsok) + " patients correctement pour " + String(@tableaupopulation[i].nbpatientstestes) + " \n")
+			#fichier.puts("Son score est : " + String(@tableaupopulation[i].score))
+			#fichier.print("\n")
 		end
 	end
 	
@@ -157,23 +181,27 @@ class Population
 	# programme et pour chaque patient                   #
 	######################################################
 	
-	def fitness(ensemblepatient,fonctionscorefit)
+	def fitness(ensemblepatient)
 	
 	# variables locales
-		
-	#prout = File.open("fitness.txt","a")	
-	# on boucle en evaluant chaque patient par le programme
-	# passé en paramètre
-		
+	t = Array.new
+	
+	
+		###### On fait tourner tous les programmes sur tous les patients en multithreading #######
+		###### On évalue le score obtenu grâce à la fonction fitness passée en paramètre dans le même temps #####
+		t = Array.new
 		0.upto ((Population.taillepopu) -1) do |i|
-			#Insert Multithreading here
-			individu = @tableaupopulation[i]
-			Thread.new {
-				individu.EvaluerLesPatients(ensemblepatient)
-			}
-			i+=1
-			
+			t[i] = Thread.new {@tableaupopulation[i].EvaluerLesPatients(ensemblepatient)
+				@tableaupopulation[i].calculerScore(Population.donnerFonctionFitness)
+				}
 		end
+		
+		0.upto ((Population.taillepopu) -1) do |j|
+			t[j].join
+		end
+		
+		###########################################################################################
+
 
 	# on calcule le score du programme
 	#	calculerScore(prog,fonctionscorefit)

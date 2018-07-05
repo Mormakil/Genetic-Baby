@@ -8,6 +8,7 @@ require "csv"
 ################################################################
 
 ###### Penser à un nombre binaire allant de 0 à 7 ##############
+#  Je suis un terminal = 000  => 0                             #
 #  1 terminal = 001  => 1                                      #
 #  2 terminaux = 010 => 2                                      #
 #  1 ou 2 terminaux = 011 => 3                                 #
@@ -67,3 +68,44 @@ class Operateurs
 
 ######### Fin de classe ################@@     
 end
+
+class Terminaux
+     
+     attr_reader :tableau
+     
+     # Prend en paramèter le chemin vers un csv contenant les opérateurs #
+     def initialize(chemin)
+          @tableau = Array.new
+          begin
+            puts "Chargement des terminaux \n"
+            
+            CSV.foreach(chemin,{ encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all}) do |row|
+               monhash = row.to_hash # il est bon, mon hash
+               @tableau.push(Operateur.new(monhash[:valeur],0))
+            end
+            print(chemin)
+            puts ".csv opened successfully \n"
+            puts "array loaded \n"
+          
+          rescue
+            print(chemin)
+            puts ".csv not opened\n"
+            puts "we give standart terminals \n"
+            @tableau[0] = Operateur.new('1',0)
+            @tableau[1] = Operateur.new('2',0)
+            @tableau[2] = Operateur.new('3',0)
+            @tableau[3] = Operateur.new('4',0)
+          end
+     end
+     
+     def afficherValeurs(fichier)
+          fichier.puts(" Les terminaux sont : ")
+          0.upto ((@tableau.size) - 1) do |i|
+               fichier.print(String(@tableau[i].valeur) + " ")
+          end
+          fichier.print("\n")
+     end
+
+######### Fin de classe ################@@     
+end
+
