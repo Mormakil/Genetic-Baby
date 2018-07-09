@@ -41,7 +41,23 @@ class Tree
                0
           end
      end
+
+     def profondeur
+          maxp = 0
+          if estFeuille?
+               0
+          else
+               0.upto ((nombreFils) -1) do |i|
+                    fils = accesFils(i)
+                    maxfils = fils.profondeur
+                    maxp = [maxp, maxfils].max
+               end   
+          end
+          return (1 + maxp)
+     end
+
      
+
      def parser
           n = self.nombreFils
           case n
@@ -129,17 +145,20 @@ s = monarbre.parser
 print(s)
 puts "\n"
 puts(eval(s))
+=end
 
+operateurs = Operateurs.new('jexistepas')
+terminaux = Terminaux.new('jexistepas')
 
 monarbredeux = Tree.new(nil)
-Tree.genererArbreIncomplet(2,operateurs,terminaux,monarbredeux)
+Tree.genererArbreIncomplet(4,operateurs,terminaux,monarbredeux)
 s = monarbredeux.parser
 print(s)
 puts "\n"
 puts(eval(s))
+puts(monarbredeux.profondeur)
 
-
-
+=begin
 monarbre = Tree.new("+")
 puts(monarbre.estFeuille?)
 monarbre.ajouterFils("3")

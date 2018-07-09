@@ -89,6 +89,13 @@ class Programme
 			end
 		end
 	end
+
+	def muter
+		profondeur = @arbre.profondeur
+		oumuter = rand(0..profondeur)
+	end
+
+
 	
 	def evaluerMonPatient(monpatient,monprog)
 		#mon prog est une chaine de caractère issue de Tree.parser
