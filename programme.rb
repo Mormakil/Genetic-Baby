@@ -90,10 +90,7 @@ class Programme
 		end
 	end
 
-	def muter
-		profondeur = @arbre.profondeur
-		oumuter = rand(0..profondeur)
-	end
+	
 
 
 	
