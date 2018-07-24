@@ -70,7 +70,7 @@ class Tree
           end
      end
 
-     def parcoursMainGauche(*arguments)
+     def parcoursMainGauche(*arguments) #0 position dans l'arbre,#1 l'element rechercher, #2 ce que l'on souhaite mettre a la place
           begin
                arguments[0] -=1
                if (arguments[0] == 0)
@@ -210,15 +210,25 @@ class Tree
           parcoursMainGauche(ouca,nil,branche)
      end
 
-     def crossover(arbre2) #à revoir. Penser multithreading
-          ouca1 = rand(1..nombrelElements)
-          ouca2 = rand(1..arbre2.nombrelElements)
-          t1 = parcoursMainGauche(ouca1,nil)
-          t2 = arbre2.parcoursMainGauche(ouca,nil)
-          arbredestination2 = t1[1]
-          arbredestination1 = t2[1]
-          parcoursMainGauche(ouca1,nil,arbredestination1)
-          arbre2.parcoursMainGauche(ouca2,nil,arbredestination2)
+     def classicCrossover(arbre2) #Penser multithreading
+          # Je fais une copie de mes arbres
+          copiearbre2 = arbre2
+          copiearbre1 = self
+          # je choisis au hasard (dans le futur, forcer la main au hasard) un point de crossover
+          # possibilité de faire un point "commun" à l'avenir
+          ouca1 = rand(1..copiearbre1.nombrelElements)
+          ouca2 = rand(1..copiearbre2.nombrelElements)
+          # j'élague de mon arbre 1 de ce qui est en dessous de mon point de crossover
+          # en fait je le remplace par nil
+          arbrevide = Tree.new(nil)
+          t1 = copiearbre1.parcoursMainGauche(ouca1,nil,arbrevide)
+          # j'élague de 2 de ce qui est au dessus de mon crossover
+          t2 = copiearbre2.parcoursMainGauche(ouca2,nil)
+          sousarbre2 = t2[1]
+          # il faut maintenant créer un arbre 3, combinaison de ces sous-arbres
+          t3 = copiearbre1.parcoursMainGauche(ouca1,nil,sousarbre2)
+          # et voilà l'arbre 3
+          return copiearbre1
      end
     
 # ---------- Fin de classe ----------#   
@@ -228,16 +238,18 @@ end
 =begin
 terminaux = [65,1]
 operateurs = Operateurs.new("operateurs.csv")
-monarbre = Tree.new(nil)
-Tree.genererArbreComplet(2,operateurs,terminaux,monarbre)
-s = monarbre.parser
-print(s)
-puts "\n"
-puts(eval(s))
 =end
-
 operateurs = Operateurs.new('jexistepas')
 terminaux = Terminaux.new('jexistepas')
+
+monarbre = Tree.new(nil)
+Tree.genererArbreComplet(4,operateurs,terminaux,monarbre)
+t = monarbre.nombrelElements
+s = monarbre.parser
+puts("résultats du parsing " + s)
+puts("nombres d éléments " + String(t))
+puts(eval(s))
+puts("la profondeur  " + String(monarbre.profondeur))
 
 monarbredeux = Tree.new(nil)
 Tree.genererArbreComplet(4,operateurs,terminaux,monarbredeux)
@@ -247,6 +259,14 @@ puts("résultats du parsing " + s)
 puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbredeux.profondeur))
+
+monarbretrois = monarbre.classicCrossover(monarbredeux)
+t = monarbretrois.nombrelElements
+s = monarbretrois.parser
+puts("résultats du parsing " + s)
+puts("nombres d éléments " + String(t))
+puts(eval(s))
+puts("la profondeur  " + String(monarbretrois.profondeur))
 =begin
 monarbredeux.parcoursMainGauche(3,nil)
 monarbredeux.parcoursMainGauche(7,nil)
@@ -263,11 +283,13 @@ puts("résultats du parsing " + s)
 puts("nombres d éléments " + String(t))
  #puts(x.valeur)
 =end
+=begin
 monarbredeux.muter(6,operateurs,terminaux)
 s = monarbredeux.parser
 prout = monarbredeux.profondeur
 puts(s)
 puts(prout)
+=end
 =begin
 monarbre = Tree.new("+")
 puts(monarbre.estFeuille?)
