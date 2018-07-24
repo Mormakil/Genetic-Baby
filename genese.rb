@@ -17,7 +17,7 @@ Population.terminaux.afficherValeurs(STDOUT)
 # Une base de patients prêts à être passé en paramètre des différents          ####
 # programmes composant la population pour évaluer le meilleure d'entre eux     ####
 ###################################################################################
-tabpatient = Patient.lireCsv("patients3.csv")
+tabpatient = Patient.lireCsv("patients4.csv")
 Population.ecrire_nbpatients(tabpatient.size)
 ####################################################################################
 
@@ -26,6 +26,9 @@ puts notredate
 
 puts "Nombre de générations ? \n"
 Population.ecrire_nbgene
+
+puts "Score attendu pour l'élu ? \n"
+Population.ecrire_scoreelu
 
 puts "Taille de la population ? \n"
 Population.ecrire_taillepopu
@@ -51,6 +54,7 @@ log.print("\n")
 log.print("Nombre de générations maximales : "+ String(Population.nbgene) + " \n")
 log.print("Nombre de patients testés à chaque génération : ")
 log.puts(Population.nbpatients)
+log.puts("Score attendu pour l'élu : " + String(Population.scoreelu))
 Population.operateurs.afficherValeurs(log)
 Population.terminaux.afficherValeurs(log)
 log.print("\n")
@@ -66,16 +70,12 @@ log.print("\n")
 
 # on génère
 # mapopulation.genererPopulation(i,mode,log)
-mapopulation.premiereGeneration(2,"ramped")
+mapopulation.premiereGeneration(6,"ramped")
 
-# on fit : penser au multithreading
-mapopulation.fitness(tabpatient)
-
-#  on trie
-# mapopulation.sort
-
-# on logge
-mapopulation.decrirepopulation(log)
+# on fit
+while (mapopulation.fitness(tabpatient,log)) do |i|
+		
+end
 
 # on continue si on n'atteint pas le nombre de générations maximales
 # ou si le cut-off de fit est atteint
@@ -85,9 +85,6 @@ mapopulation.decrirepopulation(log)
 
 #----------- on finit le log ------------------#
 
-log.print(" L'élu est : \n")
-# On sauve le meilleur
-mapopulation.inscritElu(log)
 log.print("-------------------------------------------------\n")
 log.print("                   Fin                           \n")
 log.print("-------------------------------------------------\n")

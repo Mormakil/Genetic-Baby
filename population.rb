@@ -6,13 +6,18 @@ class Population
 	@@nbgene =0
 	@@taillepopu = 0
 	@@nbpatients = 0
-	@@terminaux = [65,1]
+	@@scoreelu =0
+	@@terminaux = nil
 	@@operateurs = nil
 	@@foncfit =""
-	@@mode = {"full" => 'f', "growth" => 'g', "ramped" => 'r'}
+	@@mode = {"full" => 'f', "growth" => 'g', "ramped" => 'r', "tournament" => 't', "elite" => 'e'}
 	
 	def self.ecrire_nbgene
 		@@nbgene = Integer(gets)
+	end
+
+	def self.ecrire_scoreelu
+		@@scoreelu = Float(gets)
 	end
 	
 	def self.ecrire_taillepopu
@@ -47,6 +52,10 @@ class Population
 		@@operateurs
 	end
 	
+	def self.scoreelu
+		@@scoreelu
+	end
+
 	def self.terminaux
 		@@terminaux
 	end
@@ -114,15 +123,48 @@ class Population
 	def crossmatch(prog1,prog2)
 	end
 	
-	# génère une population
-	# A n1, la population est générée aléatoirement
-	# A n>1, on génère en fonction de règles bien précises (tournoi, sélection, random)
-	def genererPopulation(niemegeneration,mode,fichier)
-		if @niemegeneration ==1 
-			fichier.print("et c'est parti \n")
-		else
-			# ici c'est parti pour la génération en nieme génération
+	def genererPopulationTournoi(tailletournoi)
+		nombretournoi = (tableaupopulation.size) / tailletournoi
+		tableaupopulationresultat = Array.new((@tableaupopulation.size))
+		tableautournoi = Array.new(nombretournoi)
+
+		0.upto (nombretournoi -1) do |i|
+			tableautournoi[i] = Array.new
+			1.upto tailletournoi do |j]
+				x = rand(0..((@tableaupopulation.size) -1))
+				tableautournoi[i].push(@tableaupopulation[x])
+				@tableaupopulation.delete_at(x)
+			end
+			tableautounoi[i].sort_by {|x| x.score)
+			# je crossover les x% les meilleurs
+
+			# je garde la majorité
+
+			#ne sont pas retenus les y correspondants à y générés par crossmatch
 		end
+
+		# Je mute ceux qui n'ont pas été sélectionnés dans un tournoi
+
+	end
+
+	# génère une population une nieme population avec n>1
+	# A n>1, on génère en fonction de règles bien précises (tournoi, sélection, random)
+	def genererPopulation(niemegeneration,mode)
+		case mode
+		when 't'	#mode tournoi#
+			genererPopulationTournoi
+		when 'e' #mode elite#
+			0.upto ((Population.taillepopu) -1) do |i|
+				@tableaupopulation[i].generationSpontaneeGrowth(1,profondeur,Population.operateurs,Population.terminaux)
+				i += 1
+			end
+		else # random
+			0.upto ((Population.taillepopu) -1) do |i|
+				@tableaupopulation[i].generationSpontaneeRamped(1,profondeur,Population.operateurs,Population.terminaux,i)
+				i += 1
+			end
+		end	
+
 	end
 	
 	
@@ -135,11 +177,10 @@ class Population
 	end
 	
 	def inscritElu(fichier)
-		fichier.print("prout\n")
-	end
-	
-	def affichelelu
-		#gnagna
+		fichier.puts("------------------------------------")
+		fichier.puts("-----No more generations after------")
+		fichier.puts("-----'Cause we got the one----------")
+		@tableaupopulation[0].ecrireFichierResultat(fichier)
 	end
 	
 	def sauvelelu(fichier)
@@ -158,12 +199,6 @@ class Population
 		0.upto ((Population.taillepopu) -1) do |i|
 			fichier.print("programme classé° " + String(i) + " \n")
 			@tableaupopulation[i].ecrireFichierResultat(fichier)
-			#fichier.print("programme id " + String(i) + " \n")
-			#fichier.print(@tableaupopulation[i].donnerprogramme)
-			#fichier.print("\n")
-			#fichier.print("Il a trouvé " + String(@tableaupopulation[i].nbpatientsok) + " patients correctement pour " + String(@tableaupopulation[i].nbpatientstestes) + " \n")
-			#fichier.puts("Son score est : " + String(@tableaupopulation[i].score))
-			#fichier.print("\n")
 		end
 	end
 	
@@ -181,11 +216,9 @@ class Population
 	# programme et pour chaque patient                   #
 	######################################################
 	
-	def fitness(ensemblepatient)
+	def fitness(ensemblepatient,log)
 	
-	# variables locales
-	t = Array.new
-	
+		# variables locales
 	
 		###### On fait tourner tous les programmes sur tous les patients en multithreading #######
 		###### On évalue le score obtenu grâce à la fonction fitness passée en paramètre dans le même temps #####
@@ -200,11 +233,28 @@ class Population
 			t[j].join
 		end
 		
-		###########################################################################################
+	
+	######################   On range le tableau en fonction du score   ################################
+		@tableaupopulation.sort_by! {|x| x.score} #les meilleurs sont à la fin du tableau
+		decrirepopulation(log)
+	########### Si on a trouvé l'élu ou si le nombre maximum de générations ont été atteintes###########
 
-
-	# on calcule le score du programme
-	#	calculerScore(prog,fonctionscorefit)
+		if ((@tableaupopulation[0].score) >= (Population.scoreelu)) or (niemegeneration >= (Population.nbgene))
+			if @tableaupopulation[0].score >= (Population.scoreelu)
+				inscritElu(log)
+				sauvelelu(STDOUT)
+				# ici glisser le code pour créer un fichier avec l'élu qui permettra de le charger 
+				# et de le faire tourner sur un set de patients
+				#modifier la fonction sauvelelu
+				return 0
+			else
+				log.puts("echec, nous sommes arrivés au bout des générations")
+				return 0
+			end
+		else
+			1
+		end
+			
 	end
 	
 	#------- fin de la classe --------#

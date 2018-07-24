@@ -7,7 +7,7 @@ class Programme
 	attr_reader :nbpatientstestes
 	attr_accessor :score
 	
-	def initialize(arbre,version,classement)
+	def initialize(arbre,version,numero)
 		@arbre = arbre
 		@nbpatientstestes = 0
 		@nbpatientsok = 0
@@ -16,7 +16,7 @@ class Programme
 		@nbfauxpositifs = 0
 		@resultats = Array.new
 		@score = 0.0
-		@idprogramme = {"version" => version, "classement" => classement}
+		@idprogramme = {"version" => version, "numero" => numero}
 	end
 	
 	def generationSpontaneeGrowth(mode,profondeur,operateurs,terminaux)
@@ -50,7 +50,7 @@ class Programme
 		sortie.puts(@arbre.parser)
 	end
 	
-	def donnererIdClassement
+	def donnererIdNumero
 		@idprogramme[1]
 	end
 	
@@ -90,10 +90,6 @@ class Programme
 		end
 	end
 
-	
-
-
-	
 	def evaluerMonPatient(monpatient,monprog)
 		#mon prog est une chaine de caractère issue de Tree.parser
 		# ceci évite de refaire le parsing de l'arbre pour chaque évaluation de patient
@@ -126,7 +122,7 @@ class Programme
 	
 	def ecrireFichierResultat(fichier)
 		fichier.puts("******************************")
-		fichier.puts("Resultat du programme : " + String(@idprogramme["version"]) + String(@idprogramme["classement"]))
+		fichier.puts("Resultat du programme : " + String(@idprogramme["version"]) + "." + String(@idprogramme["numero"]))
 		fichier.puts("Fonction : " + @arbre.parser)
 		fichier.puts("Score donné par la fonction fitness: " + String(self.score))
 	end

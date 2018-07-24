@@ -234,11 +234,7 @@ class Tree
 # ---------- Fin de classe ----------#   
 end
 
-
 =begin
-terminaux = [65,1]
-operateurs = Operateurs.new("operateurs.csv")
-=end
 operateurs = Operateurs.new('jexistepas')
 terminaux = Terminaux.new('jexistepas')
 
@@ -267,6 +263,8 @@ puts("résultats du parsing " + s)
 puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbretrois.profondeur))
+=end
+
 =begin
 monarbredeux.parcoursMainGauche(3,nil)
 monarbredeux.parcoursMainGauche(7,nil)
