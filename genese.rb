@@ -36,7 +36,7 @@ Population.ecrire_taillepopu
 ##ici demander la taille de la fonction fitness
 Population.ecrireFonctionFitness("fitness.txt")
 
-mapopulation = Population.new(1)
+mapopulation = Population.new(1,4)
 
 ################ Ici débute le "main" ###############
 # On lance l'algo pour obtenir l'alfa programme   ###
@@ -70,11 +70,19 @@ log.print("\n")
 
 # on génère
 # mapopulation.genererPopulation(i,mode,log)
-mapopulation.premiereGeneration(6,"ramped")
+mapopulation.premiereGeneration('r')
+mapopulation.decrirePopulation(STDOUT)
+
+pastrouve = mapopulation.fitness(tabpatient,log)
+puts(pastrouve)
+mapopulation.decrirePopulation(STDOUT)
 
 # on fit
-while (mapopulation.fitness(tabpatient,log)) do |i|
-		
+
+while (pastrouve == 1) do
+	mapopulation.genererPopulation('t')
+	mapopulation.niemegeneration += 1
+	pastrouve = mapopulation.fitness(tabpatient,log)
 end
 
 # on continue si on n'atteint pas le nombre de générations maximales

@@ -70,6 +70,20 @@ class Tree
           end
      end
 
+     def copieArbre
+          t = Tree.new(self.valeur)
+
+          if estFeuille?
+               return t
+          else
+               t.fils = Array.new
+               0.upto ((fils.size) - 1) do |i|
+                    t.fils.push(@fils[i].copieArbre)
+               end
+               return t
+          end
+     end
+
      def parcoursMainGauche(*arguments) #0 position dans l'arbre,#1 l'element rechercher, #2 ce que l'on souhaite mettre a la place
           begin
                arguments[0] -=1
@@ -212,8 +226,8 @@ class Tree
 
      def classicCrossover(arbre2) #Penser multithreading
           # Je fais une copie de mes arbres
-          copiearbre2 = arbre2
-          copiearbre1 = self
+          copiearbre2 = arbre2.copieArbre
+          copiearbre1 = self.copieArbre
           # je choisis au hasard (dans le futur, forcer la main au hasard) un point de crossover
           # possibilité de faire un point "commun" à l'avenir
           ouca1 = rand(1..copiearbre1.nombrelElements)
@@ -242,7 +256,7 @@ monarbre = Tree.new(nil)
 Tree.genererArbreComplet(4,operateurs,terminaux,monarbre)
 t = monarbre.nombrelElements
 s = monarbre.parser
-puts("résultats du parsing " + s)
+puts("résultats du parsing arbre 1" + s)
 puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbre.profondeur))
@@ -251,7 +265,7 @@ monarbredeux = Tree.new(nil)
 Tree.genererArbreComplet(4,operateurs,terminaux,monarbredeux)
 t = monarbredeux.nombrelElements
 s = monarbredeux.parser
-puts("résultats du parsing " + s)
+puts("résultats du parsing arbre 2" + s)
 puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbredeux.profondeur))
@@ -259,12 +273,33 @@ puts("la profondeur  " + String(monarbredeux.profondeur))
 monarbretrois = monarbre.classicCrossover(monarbredeux)
 t = monarbretrois.nombrelElements
 s = monarbretrois.parser
-puts("résultats du parsing " + s)
+puts("résultats du parsing arbre 3" + s)
 puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbretrois.profondeur))
-=end
 
+monarbrequatre = monarbretrois.copieArbre
+t = monarbrequatre.nombrelElements
+s = monarbrequatre.parser
+puts("résultats du parsing arbre 4" + s)
+puts("nombres d éléments " + String(t))
+puts(eval(s))
+puts("la profondeur  " + String(monarbrequatre.profondeur))
+
+t = monarbredeux.nombrelElements
+s = monarbredeux.parser
+puts("résultats du parsing arbre 2" + s)
+puts("nombres d éléments " + String(t))
+puts(eval(s))
+puts("la profondeur  " + String(monarbredeux.profondeur))
+
+t = monarbre.nombrelElements
+s = monarbre.parser
+puts("résultats du parsing arbre 1" + s)
+puts("nombres d éléments " + String(t))
+puts(eval(s))
+puts("la profondeur  " + String(monarbre.profondeur))
+=end
 =begin
 monarbredeux.parcoursMainGauche(3,nil)
 monarbredeux.parcoursMainGauche(7,nil)

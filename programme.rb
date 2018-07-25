@@ -5,6 +5,7 @@ class Programme
 	attr_reader :idprogramme
 	attr_reader :nbpatientsok
 	attr_reader :nbpatientstestes
+	attr_reader :arbre
 	attr_accessor :score
 	
 	def initialize(arbre,version,numero)
@@ -17,6 +18,12 @@ class Programme
 		@resultats = Array.new
 		@score = 0.0
 		@idprogramme = {"version" => version, "numero" => numero}
+	end
+
+	def copie
+		programmecopie = Programme.new(@arbre.copieArbre,@idprogramme["version"],@idprogramme["numero"])
+		programmecopie.score = @score
+		return programmecopie
 	end
 	
 	def generationSpontaneeGrowth(mode,profondeur,operateurs,terminaux)
@@ -38,6 +45,32 @@ class Programme
 		end
 	end
 	
+	def crossmatch(prog2)
+		arbretemp = @arbre.copieArbre
+		arbretemp2 = prog2.arbre.copieArbre
+		s = arbretemp.parser
+		s2 = arbretemp2.parser
+		print(s)
+		print(s2)
+		arbretemp.classicCrossover(arbretemp2)
+		s = arbretemp.parser
+		puts("crossover en " + s)
+		prog3 = Programme.new(arbretemp,0, donnerIdNumero)
+		return prog3
+	end
+
+	def mutation(profondeur,operateurs,terminaux)
+		arbretemp = @arbre.copieArbre
+		s = arbretemp.parser
+		print(s)
+		arbretemp.muter(profondeur,operateurs,terminaux)
+		s = arbretemp.parser
+		puts("amuté en " + s)
+		@arbre = arbretemp.copieArbre
+		s = @arbre.parser
+		puts(" est devenu " + s)
+	end
+
 	def get_binding
 		return binding()
 	end
@@ -50,8 +83,12 @@ class Programme
 		sortie.puts(@arbre.parser)
 	end
 	
-	def donnererIdNumero
+	def donnerIdNumero
 		@idprogramme[1]
+	end
+
+	def donnerIdVersion
+		@idprogramme[0]
 	end
 	
 	def ecrireNbPatientsTestes(nbpatient)

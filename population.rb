@@ -79,11 +79,12 @@ class Population
 	end
 	
 	attr_accessor :niemegeneration
-	
-	def initialize(numerogeneration)
+	attr_reader :profondeur
+
+	def initialize(numerogeneration,profondeur)
 		@niemegeneration = numerogeneration
 		@tableaupopulation = Array.new(Population.taillepopu)
-		
+		@profondeur = profondeur
 		# on crée l'ensemble prêt à recevoir chaque programme
 		0.upto ((Population.taillepopu) -1) do |i|
 			@tableaupopulation[i] = Programme.new(Tree.new(nil),numerogeneration,i)
@@ -97,72 +98,130 @@ class Population
 	########## Full : génération d'arbres complets uniquement ############################
 	########## Ramped half and half : un mix des deux, le plus commun ####################
 	
-	def premiereGeneration(profondeur,mode)
+	def premiereGeneration(mode)
 		case mode
 		when 'f'	
 			0.upto ((Population.taillepopu) -1) do |i|
-				@tableaupopulation[i].generationSpontaneeFull(1,profondeur,Population.operateurs,Population.terminaux)
+				@tableaupopulation[i].generationSpontaneeFull(1,@profondeur,Population.operateurs,Population.terminaux)
 				i += 1
 			end
 		when 'g'
 			0.upto ((Population.taillepopu) -1) do |i|
-				@tableaupopulation[i].generationSpontaneeGrowth(1,profondeur,Population.operateurs,Population.terminaux)
+				@tableaupopulation[i].generationSpontaneeGrowth(1,@profondeur,Population.operateurs,Population.terminaux)
 				i += 1
 			end
 		else
 			0.upto ((Population.taillepopu) -1) do |i|
-				@tableaupopulation[i].generationSpontaneeRamped(1,profondeur,Population.operateurs,Population.terminaux,i)
+				@tableaupopulation[i].generationSpontaneeRamped(1,@profondeur,Population.operateurs,Population.terminaux,i)
 				i += 1
 			end
 		end
 	end
-	
-	def mutation(prog)
+
+	def fullMutation
+	0.upto ((@tableaupopulation.size) -1) do |i|
+			copieprog = @tableaupopulation[i]
+			@tableaupopulation[i] = copieprog.mutation(@profondeur,Population.operateurs,Population.terminaux)
+		end
 	end
 	
-	def crossmatch(prog1,prog2)
-	end
-	
-	def genererPopulationTournoi(tailletournoi)
-		nombretournoi = (tableaupopulation.size) / tailletournoi
-		tableaupopulationresultat = Array.new((@tableaupopulation.size))
+	def genererPopulationTournoi(tailletournoi,pourcentage)
+		# taille tournoi doit être pair
+		# pourcentage est un flottant entre 0 et 1
+		if (tailletournoi%2) == 1
+			puts("Nous agrandissons de 1 la taille du tournoi")
+			tailletournoi += 1
+		else
+			puts("Taille du tournoi ok")
+		end
+
+		nombretournoi = (@tableaupopulation.size) / tailletournoi
+		puts(nombretournoi)
+		puts(tailletournoi)
+		tableaupopulationresultat = Array.new
 		tableautournoi = Array.new(nombretournoi)
 
 		0.upto (nombretournoi -1) do |i|
+			puts(i)
 			tableautournoi[i] = Array.new
-			1.upto tailletournoi do |j]
-				x = rand(0..((@tableaupopulation.size) -1))
-				tableautournoi[i].push(@tableaupopulation[x])
-				@tableaupopulation.delete_at(x)
-			end
-			tableautounoi[i].sort_by {|x| x.score)
-			# je crossover les x% les meilleurs
+		
 
-			# je garde la majorité
+			0.upto (tailletournoi - 1) do |j|
+				x = rand(0..((@tableaupopulation.size) -1))
+				tableautournoi[i].push(@tableaupopulation[x].copie)
+				@tableaupopulation.delete_at(x) #à la fin de la boucle, tableaupopulation ne contient que les outcasts qui seront mutés
+				puts(j)
+			end
+
+		
+			tableautournoi[i].sort_by {|x| x.score}
+			nbcrossover = Integer(tailletournoi * pourcentage)
+			puts("nbcrossover : " + String(nbcrossover))
+			nboffsprings = nbcrossover / 2
+			puts("nboffsprings : " + String(nboffsprings))
+			nbgardes = tailletournoi - nboffsprings - nbcrossover
+			puts("nbgardes : " + String(nbgardes))
+			puts("taille : " + String(tableautournoi[i].size))
+			puts("test : " + tableautournoi[i][0].arbre.parser)
 
 			#ne sont pas retenus les y correspondants à y générés par crossmatch
+			0.upto(nboffsprings -1) do |j|
+				tableautournoi[i].delete_at(0)
+			end
+			puts("taille : " + String(tableautournoi[i].size))
+			puts("test : " + tableautournoi[i][0].arbre.parser)
+
+            # je garde la majorité
+			0.upto(nbgardes -1) do |j|
+				tableaupopulationresultat.push(tableautournoi[i][0].copie)
+				tableautournoi[i].delete_at(0)
+			end
+			puts("taille : " + String(tableautournoi[i].size))
+			puts("test : " + tableautournoi[i][0].arbre.parser)
+			# je crossover les x% les meilleurs
+			
+			j = 0
+
+			while (j < ((tableautournoi[i].size) -1)) do
+				p1 = tableautournoi[i][j].copie
+				j+=1
+				p2 = tableautournoi[i][j].copie
+				tableaupopulationresultat.push(p1)
+				tableaupopulationresultat.push(p2)
+				p3 = p1.crossmatch(p2)
+				tableaupopulationresultat.push(p3)
+				j+=1
+			end	
+		end
+		
+		puts("Taille du tableau de resultat : " + String(tableaupopulationresultat.size))
+		# Je mute ceux qui n'ont pas été sélectionnés dans un tournoi
+		0.upto ((@tableaupopulation.size) -1) do |i|
+			@tableaupopulation[i].mutation(@profondeur,Population.operateurs,Population.terminaux)
 		end
 
-		# Je mute ceux qui n'ont pas été sélectionnés dans un tournoi
+		0.upto ((tableaupopulationresultat.size) - 1) do |i|
+			@tableaupopulation.push(tableaupopulationresultat[i].copie)
+		end
 
 	end
 
 	# génère une population une nieme population avec n>1
 	# A n>1, on génère en fonction de règles bien précises (tournoi, sélection, random)
-	def genererPopulation(niemegeneration,mode)
+	def genererPopulation(mode)
 		case mode
 		when 't'	#mode tournoi#
-			genererPopulationTournoi
+			genererPopulationTournoi(20,0.20)
 		when 'e' #mode elite#
-			0.upto ((Population.taillepopu) -1) do |i|
-				@tableaupopulation[i].generationSpontaneeGrowth(1,profondeur,Population.operateurs,Population.terminaux)
-				i += 1
-			end
+			puts("modeelite")
+		when 'p'
+			puts("mode test avec premiereGeneration")
+			premiereGeneration('f')
+		when 'm'
+			puts("mode full mutation")
+			fullMutation
 		else # random
-			0.upto ((Population.taillepopu) -1) do |i|
-				@tableaupopulation[i].generationSpontaneeRamped(1,profondeur,Population.operateurs,Population.terminaux,i)
-				i += 1
-			end
+			puts("random")
 		end	
 
 	end
@@ -183,13 +242,13 @@ class Population
 		@tableaupopulation[0].ecrireFichierResultat(fichier)
 	end
 	
-	def sauvelelu(fichier)
+	def sauveLElu(fichier)
 		fichier.puts "dans un fichier oh oh\n"
 		fichier.puts "de Dana lalilala \n"
 		fichier.puts "j'ai sauvé l'élu  \n"
 	end
 	
-	def decrirepopulation(fichier)
+	def decrirePopulation(fichier)
 		fichier.print("********************************\n")
 		fichier.print("Ceci est la génération n° : " + String(self.niemegeneration) + "\n")
 		Population.operateurs.afficherValeurs(fichier)
@@ -236,13 +295,13 @@ class Population
 	
 	######################   On range le tableau en fonction du score   ################################
 		@tableaupopulation.sort_by! {|x| x.score} #les meilleurs sont à la fin du tableau
-		decrirepopulation(log)
+		decrirePopulation(log)
 	########### Si on a trouvé l'élu ou si le nombre maximum de générations ont été atteintes###########
 
-		if ((@tableaupopulation[0].score) >= (Population.scoreelu)) or (niemegeneration >= (Population.nbgene))
-			if @tableaupopulation[0].score >= (Population.scoreelu)
+		if (((@tableaupopulation[0].score) >= (Population.scoreelu)) or (self.niemegeneration > (Population.nbgene)))
+			if (@tableaupopulation[0].score >= (Population.scoreelu))
 				inscritElu(log)
-				sauvelelu(STDOUT)
+				sauveLElu(STDOUT)
 				# ici glisser le code pour créer un fichier avec l'élu qui permettra de le charger 
 				# et de le faire tourner sur un set de patients
 				#modifier la fonction sauvelelu
@@ -252,7 +311,9 @@ class Population
 				return 0
 			end
 		else
-			1
+
+			log.puts("why do we fall ?")
+			return 1
 		end
 			
 	end
