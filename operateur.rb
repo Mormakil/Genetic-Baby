@@ -44,7 +44,7 @@ class Operateurs
                @tableau.push(Operateur.new(monhash[:valeur],monhash[:combien]))
             end
             puts(chemin)
-            puts ".csv opened successfully \n"
+            puts "opened successfully \n"
             puts "array loaded \n"
           
           rescue

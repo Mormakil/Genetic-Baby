@@ -6,6 +6,7 @@ class Programme
 	attr_reader :nbpatientsok
 	attr_reader :nbpatientstestes
 	attr_reader :arbre
+	attr_reader :erreurrms
 	attr_accessor :score
 	
 	def initialize(arbre,version,numero)
@@ -17,6 +18,7 @@ class Programme
 		@nbfauxpositifs = 0
 		@resultats = Array.new
 		@score = 0.0
+		@erreurrms = 0.0 ##optionnel gauss
 		@idprogramme = {"version" => version, "numero" => numero}
 	end
 
@@ -125,8 +127,10 @@ class Programme
 				increaseFauxNegatifs
 			end
 		end
+		return (res - respatient)**2 #optionnel run Gauss
 	end
 
+###### Applique la fonction créée dans l'arbre sur les paramètres données par le patient #########
 	def evaluerMonPatient(monpatient,monprog)
 		#mon prog est une chaine de caractère issue de Tree.parser
 		# ceci évite de refaire le parsing de l'arbre pour chaque évaluation de patient
@@ -134,8 +138,10 @@ class Programme
 		resultat = eval(monprog,b)
 		return resultat
 	end
-	
+
+####### Pour chaque patient d'un tableau, applique la fonction, stocke le résultat et affirme si les deux résultats sont égaux ########	
 	def EvaluerLesPatients(tabpatient)
+		ecartpatient = 0
 		n = (tabpatient.size) - 1
 		s = @arbre.parser
 		puts(s)
@@ -145,13 +151,15 @@ class Programme
 			rescue ZeroDivisionError
 				resultat = 0
 			end
-			comparerResultats(resultat,tabpatient[i].resultat)
+			ecartpatient += comparerResultats(resultat,tabpatient[i].resultat)
 			@resultats.push(resultat)
 			i += 1
 			increasePatientTestes
 		end
+		@erreurrms = Math.sqrt(ecartpatient.to_f / n.to_f) #optionnel run Gauss
 	end
-	
+
+####### Permet d'appliquer la fonction fitness au programme et de donner le score du programma ######	
 	def calculerScore(s)
 		b = get_binding
 		@score = eval(s,b)

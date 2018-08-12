@@ -26,21 +26,22 @@ class Patient
 	#### et renvoie un tableau de patients         #######
 	
 	def Patient.lireCsv(chemin)
+		
+		tabpatient = Array.new
 		begin
-			tabpatient = Array.new
+			puts "Chargement des patients \n"	
+			
 			CSV.foreach(chemin,{ encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all}) do |row|
-				
 				monhash = row.to_hash # il est bon, mon hash
 				tabpatient.push(Patient.new(monhash[:id],monhash[:resultat]))
-				puts(monhash[:age])
 			end
-			raise "File not found"
-			print(chemin)
-			puts " opened successfully \n"
-			puts "Patients loaded \n"
+			
+			puts(chemin)
+			puts ".csv opened successfully \n"
+			puts "array loaded \n"
 		rescue
 			print(chemin)
-			puts ".csv not found\n"
+			puts " not found\n"
 			puts "we create random patients \n"
 			tabpatient = Array.new(100)
 			0.upto 99 do |i|

@@ -33,7 +33,7 @@ Population.ecrire_scoreelu
 puts "Taille de la population ? \n"
 Population.ecrire_taillepopu
 
-##ici demander la taille de la fonction fitness
+##ici demander la fonction fitness
 Population.ecrireFonctionFitness("fitness.txt")
 
 mapopulation = Population.new(1,4)

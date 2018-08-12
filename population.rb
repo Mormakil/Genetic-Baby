@@ -63,9 +63,9 @@ class Population
 	def self.ecrireFonctionFitness(chemin)
 		begin
 			fit = File.open(chemin,"r")	
-			raise "fitness.txt ne s'est pas ouvert"
 			@@foncfit = fit.gets
 		rescue
+			puts "fitness.txt ne s'est pas ouvert"
 			@@foncfit = "self.nbpatientsok.to_f / self.nbpatientstestes.to_f"
 		end
 	end
@@ -136,43 +136,44 @@ class Population
 		end
 
 		nombretournoi = (@tableaupopulation.size) / tailletournoi
-		puts(nombretournoi)
-		puts(tailletournoi)
 		tableaupopulationresultat = Array.new
 		tableautournoi = Array.new(nombretournoi)
 
-		0.upto (nombretournoi -1) do |i|
-			puts(i)
+		0.upto ((nombretournoi) -1) do |i|
+			# pour chaque tournoi je créée un tableau de taille tournoi ...
 			tableautournoi[i] = Array.new
 		
 
 			0.upto (tailletournoi - 1) do |j|
 				x = rand(0..((@tableaupopulation.size) -1))
+				# ... et je met dans le tournoi un élément au hasard qui viendra se battre avec d'autres
 				tableautournoi[i].push(@tableaupopulation[x].copie)
 				@tableaupopulation.delete_at(x) #à la fin de la boucle, tableaupopulation ne contient que les outcasts qui seront mutés
-				puts(j)
 			end
 
-		
+			# A chaque tableau de tournoi, je les classe par score (plus haut score à la fin pour rappel)
 			tableautournoi[i].sort_by {|x| x.score}
+			# je calcule le nombre de crossover que je fais : c'est un nombre de paires !!!!! donc x paires = x paire d'offsprings
 			nbcrossover = Integer(tailletournoi * pourcentage)
 			puts("nbcrossover : " + String(nbcrossover))
 			nboffsprings = nbcrossover / 2
+			# qui donneront 2 crossoveré pour 1 offsprijngé 
 			puts("nboffsprings : " + String(nboffsprings))
+			# ceux auquels on ne touchera pas
 			nbgardes = tailletournoi - nboffsprings - nbcrossover
 			puts("nbgardes : " + String(nbgardes))
 			puts("taille : " + String(tableautournoi[i].size))
 			puts("test : " + tableautournoi[i][0].arbre.parser)
 
 			#ne sont pas retenus les y correspondants à y générés par crossmatch
-			0.upto(nboffsprings -1) do |j|
+			0.upto((nboffsprings) -1) do |j|
 				tableautournoi[i].delete_at(0)
 			end
 			puts("taille : " + String(tableautournoi[i].size))
 			puts("test : " + tableautournoi[i][0].arbre.parser)
 
             # je garde la majorité
-			0.upto(nbgardes -1) do |j|
+			0.upto((nbgardes) -1) do |j|
 				tableaupopulationresultat.push(tableautournoi[i][0].copie)
 				tableautournoi[i].delete_at(0)
 			end
@@ -278,6 +279,7 @@ class Population
 	def fitness(ensemblepatient,log)
 	
 		# variables locales
+		dernierelt = (Population.taillepopu) -1
 	
 		###### On fait tourner tous les programmes sur tous les patients en multithreading #######
 		###### On évalue le score obtenu grâce à la fonction fitness passée en paramètre dans le même temps #####
@@ -294,12 +296,12 @@ class Population
 		
 	
 	######################   On range le tableau en fonction du score   ################################
-		@tableaupopulation.sort_by! {|x| x.score} #les meilleurs sont à la fin du tableau
+		@tableaupopulation.sort_by! {|x| x.score} #les scores les plus élevés sont à la fin du tableau => donc penser à ramener sur 1 et faire 1- score si on veut une valeur de score basse
 		decrirePopulation(log)
 	########### Si on a trouvé l'élu ou si le nombre maximum de générations ont été atteintes###########
 
-		if (((@tableaupopulation[0].score) >= (Population.scoreelu)) or (self.niemegeneration > (Population.nbgene)))
-			if (@tableaupopulation[0].score >= (Population.scoreelu))
+		if (((@tableaupopulation[dernierelt].score) >= (Population.scoreelu)) or (self.niemegeneration > (Population.nbgene)))
+			if (@tableaupopulation[dernierelt].score >= (Population.scoreelu))
 				inscritElu(log)
 				sauveLElu(STDOUT)
 				# ici glisser le code pour créer un fichier avec l'élu qui permettra de le charger 
