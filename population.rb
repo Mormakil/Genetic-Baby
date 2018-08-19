@@ -125,14 +125,14 @@ class Population
 		end
 	end
 	
-	def genererPopulationTournoi(tailletournoi,pourcentage)
+	def genererPopulationTournoi(tailletournoi,nbpairescrossover)
 		# taille tournoi doit être pair
 		# pourcentage est un flottant entre 0 et 1
 		if (tailletournoi%2) == 1
 			puts("Nous agrandissons de 1 la taille du tournoi")
 			tailletournoi += 1
 		else
-			puts("Taille du tournoi ok")
+			puts("Taille du tournoi :" + String(tailletournoi))
 		end
 
 		nombretournoi = (@tableaupopulation.size) / tailletournoi
@@ -154,35 +154,25 @@ class Population
 			# A chaque tableau de tournoi, je les classe par score (plus haut score à la fin pour rappel)
 			tableautournoi[i].sort_by {|x| x.score}
 			# je calcule le nombre de crossover que je fais : c'est un nombre de paires !!!!! donc x paires = x paire d'offsprings
-			nbcrossover = Integer(tailletournoi * pourcentage)
-			puts("nbcrossover : " + String(nbcrossover))
-			nboffsprings = nbcrossover / 2
-			# qui donneront 2 crossoveré pour 1 offsprijngé 
-			puts("nboffsprings : " + String(nboffsprings))
-			# ceux auquels on ne touchera pas
+			nbcrossover = nbpairescrossover *2
+			nboffsprings = nbpairescrossover * 2
+			# qui donneront 2 crossoveré pour 2 offsprijngé 
+			# ceux auquels on ne touchera pas : ceux qui restent en plus des élites du crossover et ceux issus du crossover
 			nbgardes = tailletournoi - nboffsprings - nbcrossover
-			puts("nbgardes : " + String(nbgardes))
-			puts("taille : " + String(tableautournoi[i].size))
-			puts("test : " + tableautournoi[i][0].arbre.parser)
 
-			#ne sont pas retenus les y correspondants à y générés par crossmatch
+			#ne sont pas retenus les y correspondants aux y offsprings
 			0.upto((nboffsprings) -1) do |j|
 				tableautournoi[i].delete_at(0)
 			end
-			puts("taille : " + String(tableautournoi[i].size))
-			puts("test : " + tableautournoi[i][0].arbre.parser)
 
             # je garde la majorité
 			0.upto((nbgardes) -1) do |j|
 				tableaupopulationresultat.push(tableautournoi[i][0].copie)
 				tableautournoi[i].delete_at(0)
 			end
-			puts("taille : " + String(tableautournoi[i].size))
-			puts("test : " + tableautournoi[i][0].arbre.parser)
-			# je crossover les x% les meilleurs
-			
-			j = 0
 
+			# je crossover les x% les meilleurs
+			j = 0
 			while (j < ((tableautournoi[i].size) -1)) do
 				p1 = tableautournoi[i][j].copie
 				j+=1
@@ -190,7 +180,9 @@ class Population
 				tableaupopulationresultat.push(p1)
 				tableaupopulationresultat.push(p2)
 				p3 = p1.crossmatch(p2)
+				p4 = p2.crossmatch(p1)
 				tableaupopulationresultat.push(p3)
+				tableaupopulationresultat.push(p4)
 				j+=1
 			end	
 		end
@@ -212,7 +204,7 @@ class Population
 	def genererPopulation(mode)
 		case mode
 		when 't'	#mode tournoi#
-			genererPopulationTournoi(20,0.20)
+			genererPopulationTournoi(20,4)
 		when 'e' #mode elite#
 			puts("modeelite")
 		when 'p'

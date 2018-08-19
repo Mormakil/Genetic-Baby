@@ -47,6 +47,8 @@ class Programme
 		end
 	end
 	
+	# crossover de l'arbre actuel et d'un deuxième arbre
+	# penser à faire de même avec arbre 2 et arbre actuel 2 arbres =  2 offsprings
 	def crossmatch(prog2)
 		arbretemp = @arbre.copieArbre
 		arbretemp2 = prog2.arbre.copieArbre
@@ -170,6 +172,7 @@ class Programme
 		fichier.puts("Resultat du programme : " + String(@idprogramme["version"]) + "." + String(@idprogramme["numero"]))
 		fichier.puts("Fonction : " + @arbre.parser)
 		fichier.puts("Score donné par la fonction fitness: " + String(self.score))
+		fichier.puts("******************************")
 	end
 	
 ##############Fin de Classe############

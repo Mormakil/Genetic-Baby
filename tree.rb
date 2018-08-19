@@ -43,18 +43,54 @@ class Tree
           end
      end
 
+     # débute à 1, fonctionne
      def profondeur
           maxp = 0
           if estFeuille?
                0
           else
                0.upto ((nombreFils) -1) do |i|
-                    fils = accesFils(i)
-                    maxfils = fils.profondeur
+                    lefils = accesFils(i)
+                    maxfils = lefils.profondeur
                     maxp = [maxp, maxfils].max
                end   
           end
           return (1 + maxp)
+     end
+
+     # On prend très rarement des feuilles et on ne prend jamais l'arbre dans son intégralité
+     def hasardProfondeurPonderee(pourcentage,profondeurmax)
+          hasard = rand(1..100)
+          if (hasard > pourcentage)
+               return 1
+          else
+               tbloc = pourcentage/(profondeurmax - 2)
+               return ((hasard / tbloc) + 2) 
+          end
+     end
+
+     # retoune au hasard un sous-arbre de profondeur donnée
+     def noeudProfondeurPonderee(pourcentage)
+          prof = profondeur
+          prof = hasardProfondeurPonderee(pourcentage,prof)
+          tableau = Array.new
+          remplirSousArbreProfondeurParcoursMainGauche(prof,tableau)
+          taille = ((tableau.size) - 1)
+          hasard = rand(0..taille)
+          return (tableau[hasard])
+     end
+
+     def remplirSousArbreProfondeurParcoursMainGauche(notreprofondeur,tableau)
+          prof = self.profondeur
+          if (prof == notreprofondeur)
+               #tableau.push(self.copieArbre)
+               tableau.push(self)
+          else
+               0.upto ((nombreFils) -1) do |i|
+                    lefils = accesFils(i)
+                    lefils.remplirSousArbreProfondeurParcoursMainGauche(notreprofondeur,tableau)
+               end   
+          end
      end
 
      def nombrelElements
@@ -84,7 +120,20 @@ class Tree
           end
      end
 
-     def parcoursMainGauche(*arguments) #0 position dans l'arbre,#1 l'element rechercher, #2 ce que l'on souhaite mettre a la place
+     def rechercherEtRemplacerNoeud(ad1,ad2)
+          0.upto ((nombreFils) -1) do |i|
+              # lefils = accesFils(i)
+               if (@fils[i] == ad1)
+                    @fils[i] = ad2.copieArbre
+                    puts(@fils[i].parser)
+                    i = nombreFils
+               else
+                    @fils[i].rechercherEtRemplacerNoeud(ad1,ad2)
+               end
+          end
+     end
+     
+     def parcoursMainGauche(*arguments) #0 position dans l'arbre,#1 l'element recherché, #2 ce que l'on souhaite mettre a la place
           begin
                arguments[0] -=1
                if (arguments[0] == 0)
@@ -224,31 +273,34 @@ class Tree
           parcoursMainGauche(ouca,nil,branche)
      end
 
+
+     # problème ici
+     # 1) s'assurer du crossover sur un noeud
+     # 2) s'assurer que la porfondeur ne sera pas trop profonde
+     # 3) 2 parents = 2 enfant = 1 point de crossover
+     # copie arbre : la fonction fonctionne
+
      def classicCrossover(arbre2) #Penser multithreading
           # Je fais une copie de mes arbres
           copiearbre2 = arbre2.copieArbre
           copiearbre1 = self.copieArbre
-          # je choisis au hasard (dans le futur, forcer la main au hasard) un point de crossover
-          # possibilité de faire un point "commun" à l'avenir
-          ouca1 = rand(1..copiearbre1.nombrelElements)
-          ouca2 = rand(1..copiearbre2.nombrelElements)
-          # j'élague de mon arbre 1 de ce qui est en dessous de mon point de crossover
-          # en fait je le remplace par nil
-          arbrevide = Tree.new(nil)
-          t1 = copiearbre1.parcoursMainGauche(ouca1,nil,arbrevide)
-          # j'élague de 2 de ce qui est au dessus de mon crossover
-          t2 = copiearbre2.parcoursMainGauche(ouca2,nil)
-          sousarbre2 = t2[1]
-          # il faut maintenant créer un arbre 3, combinaison de ces sous-arbres
-          t3 = copiearbre1.parcoursMainGauche(ouca1,nil,sousarbre2)
-          # et voilà l'arbre 3
-          return copiearbre1
+     
+          #Extraction de deux sous-arbres de profondeur prise au hasard
+          sousarbre2 = copiearbre2.noeudProfondeurPonderee(80) #pourcentage : 80
+          sousarbre1 = copiearbre1.noeudProfondeurPonderee(80) #pourcentage : 80
+          # swap des adresses
+          copiearbre2.rechercherEtRemplacerNoeud(sousarbre2,sousarbre1)
+          copiearbre1.rechercherEtRemplacerNoeud(sousarbre1,sousarbre2)
+          tableau = Array.new
+          tableau.push(copiearbre1)
+          tableau.push(copiearbre2)
+          return tableau
      end
     
 # ---------- Fin de classe ----------#   
 end
 
-=begin
+
 operateurs = Operateurs.new('jexistepas')
 terminaux = Terminaux.new('jexistepas')
 
@@ -256,7 +308,7 @@ monarbre = Tree.new(nil)
 Tree.genererArbreComplet(4,operateurs,terminaux,monarbre)
 t = monarbre.nombrelElements
 s = monarbre.parser
-puts("résultats du parsing arbre 1" + s)
+puts("résultats du parsing arbre 1 : " + s)
 puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbre.profondeur))
@@ -265,19 +317,48 @@ monarbredeux = Tree.new(nil)
 Tree.genererArbreComplet(4,operateurs,terminaux,monarbredeux)
 t = monarbredeux.nombrelElements
 s = monarbredeux.parser
-puts("résultats du parsing arbre 2" + s)
+puts("résultats du parsing arbre 2 : " + s)
 puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbredeux.profondeur))
 
-monarbretrois = monarbre.classicCrossover(monarbredeux)
+tab = monarbre.classicCrossover(monarbredeux)
+
+monarbretrois = tab[0]
 t = monarbretrois.nombrelElements
 s = monarbretrois.parser
-puts("résultats du parsing arbre 3" + s)
+puts("résultats du parsing arbre 3 : " + s)
 puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbretrois.profondeur))
 
+monarbrecinq = tab[1]
+t = monarbrecinq.nombrelElements
+s = monarbrecinq.parser
+puts("résultats du parsing arbre 5 : " + s)
+puts("nombres d éléments " + String(t))
+puts(eval(s))
+puts("la profondeur  " + String(monarbrecinq.profondeur))
+
+monarbresix = monarbre.noeudProfondeurPonderee(80)
+t = monarbresix.nombrelElements
+s = monarbresix.parser
+puts("résultats du parsing arbre 6 : " + s)
+puts("nombres d éléments " + String(t))
+puts(eval(s))
+puts("la profondeur  " + String(monarbresix.profondeur))
+monarbresix.valeur = "+"
+s = monarbre.parser
+puts("résultats du parsing arbre 1 : " + s)
+
+monarbrecinq = monarbresix
+t = monarbrecinq.nombrelElements
+s = monarbrecinq.parser
+puts("résultats du parsing arbre 5 : " + s)
+puts("nombres d éléments " + String(t))
+puts(eval(s))
+puts("la profondeur  " + String(monarbrecinq.profondeur))
+=begin
 monarbrequatre = monarbretrois.copieArbre
 t = monarbrequatre.nombrelElements
 s = monarbrequatre.parser
