@@ -49,18 +49,12 @@ class Programme
 	
 	# crossover de l'arbre actuel et d'un deuxième arbre
 	# penser à faire de même avec arbre 2 et arbre actuel 2 arbres =  2 offsprings
+	# retourne les 2 nouveaux programmes dans un tableau
 	def crossmatch(prog2)
-		arbretemp = @arbre.copieArbre
-		arbretemp2 = prog2.arbre.copieArbre
-		s = arbretemp.parser
-		s2 = arbretemp2.parser
-		print(s)
-		print(s2)
-		arbretemp.classicCrossover(arbretemp2)
-		s = arbretemp.parser
-		puts("crossover en " + s)
-		prog3 = Programme.new(arbretemp,0, donnerIdNumero)
-		return prog3
+		tab = @arbre.classicCrossover(prog2.arbre)
+		prog3 = Programme.new(tab[0],0, donnerIdNumero)
+		prog4 = Programme.new(tab[1],0, donnerIdNumero)
+		return [prog3,prog4]
 	end
 
 	def mutation(profondeur,operateurs,terminaux)

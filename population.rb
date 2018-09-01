@@ -179,10 +179,9 @@ class Population
 				p2 = tableautournoi[i][j].copie
 				tableaupopulationresultat.push(p1)
 				tableaupopulationresultat.push(p2)
-				p3 = p1.crossmatch(p2)
-				p4 = p2.crossmatch(p1)
-				tableaupopulationresultat.push(p3)
-				tableaupopulationresultat.push(p4)
+				tprog = p1.crossmatch(p2)
+				tableaupopulationresultat.push(tprog[0])
+				tableaupopulationresultat.push(tprog[1])
 				j+=1
 			end	
 		end

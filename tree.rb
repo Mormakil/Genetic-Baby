@@ -5,6 +5,7 @@
 require_relative "operateur"
 class Tree
      
+     PROFONDEURMAXIMALE = 100
      attr_accessor :valeur
      attr_accessor :fils
      
@@ -61,7 +62,7 @@ class Tree
      # On prend très rarement des feuilles et on ne prend jamais l'arbre dans son intégralité
      def hasardProfondeurPonderee(pourcentage,profondeurmax)
           hasard = rand(1..100)
-          if (hasard > pourcentage)
+          if ((hasard > pourcentage) or (profondeurmax < 3))
                return 1
           else
                tbloc = pourcentage/(profondeurmax - 2)
@@ -194,8 +195,8 @@ class Tree
      # pour l'instant génère un arbre binaire. réfléchir aux terminaux et modifier en conséquence
      # ici la profondeur est fixe i.e si au début donnée à 2 finira à 2
      # donc si on veut une profondeur au hasard, randomiser profondeur lors de l'appel de la méthode
-     def Tree.genererArbreComplet(profondeur,operateurs,terminaux,arbre)
-          if profondeur == 1
+     def Tree.genererArbreComplet(maprofondeur,operateurs,terminaux,arbre)
+          if maprofondeur == 1
                # prendre au hasard un terminal
                n = rand(0..(terminaux.tableau.size) -1)
                arbre.valeur = String(terminaux.tableau[n].valeur)
@@ -205,11 +206,11 @@ class Tree
                n = rand(0..(operateurs.tableau.size) -1)
                arbre.valeur = operateurs.tableau[n].valeur 
                # et relancer sur deux fils
-               profondeur -= 1
+               maprofondeur -= 1
                arbre.ajouterFils(nil)
-               Tree.genererArbreComplet(profondeur,operateurs,terminaux,arbre.accesFils(0))
+               Tree.genererArbreComplet(maprofondeur,operateurs,terminaux,arbre.accesFils(0))
                arbre.ajouterFils(nil)
-               Tree.genererArbreComplet(profondeur,operateurs,terminaux,arbre.accesFils(1))
+               Tree.genererArbreComplet(maprofondeur,operateurs,terminaux,arbre.accesFils(1))
           end
      end
      
@@ -249,6 +250,46 @@ class Tree
      end
 
 
+# profondeur initiale = profondeur max de la mutation
+# et puis on donne les opérateurs et les terminaux
+     def muter(profondeurinitiale, operateurs, terminaux)
+          profarbre = self.profondeur
+          
+          # déterminer à quelle profondeur on greffera en respectant la profondeur de l'arbre
+          haut = profarbre
+          bas = 1
+          temp = PROFONDEURMAXIMALE - profarbre 
+          if (temp <= profondeurinitiale)
+               bas = temp
+               proftaillechoisie = rand(1..temp)
+          else
+               bas = 1
+               proftaillechoisie = rand(1..profondeurinitiale)
+          end
+
+          profougreffer = rand(bas..haut)
+          
+          #déterminer au hasard le type d'arbre qui sied à la mutation
+          i = rand(1..2)
+          nouvellemutation = Tree.new(nil)
+          if ((i % 2) == 0)
+               Tree.genererArbreComplet(proftaillechoisie,operateurs,terminaux,nouvellemutation)
+          else
+               Tree.genererArbreIncomplet(proftaillechoisie,operateurs,terminaux,nouvellemutation)
+          end
+          
+          #prendre un noeud au hasard à cette profondeur
+          tableaunoeud = Array.new()
+          remplirSousArbreProfondeurParcoursMainGauche(profougreffer,tableaunoeud)
+          taille = ((tableaunoeud.size) - 1)
+          hasard = rand(0..taille)
+          noeuddetermine = tableaunoeud[hasard]
+          
+          #remplacer ce noeud par celui créer lors de la mutation.
+          rechercherEtRemplacerNoeud(noeuddetermine,nouvellemutation)
+     end
+
+=begin
      def muter(profondeurmax,operateurs,terminaux)
 
           # Décider de où muter
@@ -257,8 +298,13 @@ class Tree
           # se rendre à l'élément en parcours main gauche
           t = parcoursMainGauche(ouca,nil)
           elt = t[1]
-          pos = self.profondeur - elt.profondeur + 1
+          pos = 1 + ((self.profondeur) - (elt.profondeur))
           # Puis créer une branche à greffer ni trop grande ni trop petite
+          puts("notre profondeur : ")
+          puts(self.profondeur)
+          puts(elt.profondeur)
+          puts(pos)
+          puts(profondeurmax - pos)
           profondeurbranche = rand(1..((profondeurmax - pos) + 1))
           i = rand(1..2) # au hasard, branche complete ou incomplete
           branche = Tree.new(nil)
@@ -272,7 +318,7 @@ class Tree
           # et appliquer la greffe
           parcoursMainGauche(ouca,nil,branche)
      end
-
+=end
 
      # problème ici
      # 1) s'assurer du crossover sur un noeud
@@ -305,7 +351,7 @@ operateurs = Operateurs.new('jexistepas')
 terminaux = Terminaux.new('jexistepas')
 
 monarbre = Tree.new(nil)
-Tree.genererArbreComplet(4,operateurs,terminaux,monarbre)
+Tree.genererArbreIncomplet(4,operateurs,terminaux,monarbre)
 t = monarbre.nombrelElements
 s = monarbre.parser
 puts("résultats du parsing arbre 1 : " + s)
@@ -313,6 +359,12 @@ puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbre.profondeur))
 
+monarbre.muter(4,operateurs,terminaux)
+s = monarbre.parser
+prout = monarbre.profondeur
+puts(s)
+puts(prout)
+=begin
 monarbredeux = Tree.new(nil)
 Tree.genererArbreComplet(4,operateurs,terminaux,monarbredeux)
 t = monarbredeux.nombrelElements
@@ -358,7 +410,7 @@ puts("résultats du parsing arbre 5 : " + s)
 puts("nombres d éléments " + String(t))
 puts(eval(s))
 puts("la profondeur  " + String(monarbrecinq.profondeur))
-=begin
+
 monarbrequatre = monarbretrois.copieArbre
 t = monarbrequatre.nombrelElements
 s = monarbrequatre.parser
@@ -398,11 +450,7 @@ puts("nombres d éléments " + String(t))
  #puts(x.valeur)
 =end
 =begin
-monarbredeux.muter(6,operateurs,terminaux)
-s = monarbredeux.parser
-prout = monarbredeux.profondeur
-puts(s)
-puts(prout)
+
 =end
 =begin
 monarbre = Tree.new("+")
