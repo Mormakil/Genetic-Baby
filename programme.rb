@@ -28,17 +28,17 @@ class Programme
 		return programmecopie
 	end
 	
-	def generationSpontaneeGrowth(mode,profondeur,operateurs,terminaux)
+	def generationSpontaneeGrowth(profondeur,operateurs,terminaux)
 		@arbre = Tree.new(nil)
 		Tree.genererArbreIncomplet(profondeur,operateurs,terminaux,@arbre)
 	end
 	
-	def generationSpontaneeFull(mode,profondeur,operateurs,terminaux)
+	def generationSpontaneeFull(profondeur,operateurs,terminaux)
 		@arbre = Tree.new(nil)
 		Tree.genererArbreComplet(profondeur,operateurs,terminaux,@arbre)
 	end
 	
-	def generationSpontaneeRamped(mode,profondeur,operateurs,terminaux,i)
+	def generationSpontaneeRamped(profondeur,operateurs,terminaux,i)
 		@arbre = Tree.new(nil)
 		if ((i % 2) == 0)
 			Tree.genererArbreComplet(profondeur,operateurs,terminaux,@arbre)

@@ -346,7 +346,7 @@ class Tree
 # ---------- Fin de classe ----------#   
 end
 
-
+=begin
 operateurs = Operateurs.new('jexistepas')
 terminaux = Terminaux.new('jexistepas')
 

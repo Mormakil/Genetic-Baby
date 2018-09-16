@@ -77,6 +77,10 @@ class Population
 	def self.donnerFonctionFitness
 		@@foncfit
 	end
+
+	def self.ecrireTaillePopu(nouvelletaille)
+		@@taillepopu = nouvelletaille
+	end
 	
 	attr_accessor :niemegeneration
 	attr_reader :profondeur
@@ -102,22 +106,24 @@ class Population
 		case mode
 		when 'f'	
 			0.upto ((Population.taillepopu) -1) do |i|
-				@tableaupopulation[i].generationSpontaneeFull(1,@profondeur,Population.operateurs,Population.terminaux)
+				@tableaupopulation[i].generationSpontaneeFull(@profondeur,Population.operateurs,Population.terminaux)
 				i += 1
 			end
 		when 'g'
 			0.upto ((Population.taillepopu) -1) do |i|
-				@tableaupopulation[i].generationSpontaneeGrowth(1,@profondeur,Population.operateurs,Population.terminaux)
+				@tableaupopulation[i].generationSpontaneeGrowth(@profondeur,Population.operateurs,Population.terminaux)
 				i += 1
 			end
 		else
 			0.upto ((Population.taillepopu) -1) do |i|
-				@tableaupopulation[i].generationSpontaneeRamped(1,@profondeur,Population.operateurs,Population.terminaux,i)
+				@tableaupopulation[i].generationSpontaneeRamped(@profondeur,Population.operateurs,Population.terminaux,i)
 				i += 1
 			end
 		end
 	end
 
+	# Attention, ici sémaantiquement faux ; il n'y a pas de recopie de la structure. Il y a copie d'adresse
+	# L'arbre originel est donc modifié.
 	def fullMutation
 	0.upto ((@tableaupopulation.size) -1) do |i|
 			copieprog = @tableaupopulation[i]
@@ -125,76 +131,115 @@ class Population
 		end
 	end
 	
-	def genererPopulationTournoi(tailletournoi,nbpairescrossover)
-		# taille tournoi doit être pair
-		# pourcentage est un flottant entre 0 et 1
-		if (tailletournoi%2) == 1
-			puts("Nous agrandissons de 1 la taille du tournoi")
-			tailletournoi += 1
-		else
-			puts("Taille du tournoi :" + String(tailletournoi))
-		end
+	def subCrossmatch(t1,t2)
+		puts(t1.size)
+		j = 0
+		while (j < ((t1.size) -1)) do
+			p1 = t1[j].copie
+			j+=1
+			p2 = t1[j].copie
+			t2.push(p1)
+			t2.push(p2)
+			tprog = p1.crossmatch(p2)
+			t2.push(tprog[0])
+			t2.push(tprog[1])
+			j+=1
+		end	
+	end
+
+def genererPopulationTournoi(tailletournoi,pourcentagecrossmatch,pourcentagemutation,pourcentagecopie)
+		# Le nombre de tournoi décide de la taille du tournoi
+		# Sécurité : le dernier tournoi risque d'être plus petit que les autres
+		# Dans l'idéal demander une taille de tournoi avec reste 0 (que des tournois pleins)
 
 		nombretournoi = (@tableaupopulation.size) / tailletournoi
+		tailletournoirestant = (@tableaupopulation.size) % tailletournoi
 		tableaupopulationresultat = Array.new
-		tableautournoi = Array.new(nombretournoi)
 
-		0.upto ((nombretournoi) -1) do |i|
-			# pour chaque tournoi je créée un tableau de taille tournoi ...
-			tableautournoi[i] = Array.new
+		if (tailletournoirestant > 0)
+			nombretournoi +=1
+		end
+
+		if (nombretournoi < 2)
+			@tableaupopulation.sort_by {|x| x.score}
+			index1 = (@tableaupopulation.size) -1
+			index2 = (@tableaupopulation.size) -2
+			t = [@tableaupopulation[index1],@tableaupopulation[index2]]
+			subCrossmatch(t,tableaupopulationresultat)
+		else
+			# le tableau des survivants
+			tableauhighlander = Array.new
+			tableautournoi = Array.new(tailletournoi)
+			puts("Nombre de tournois :" + String(nombretournoi))
+
+			while (@tableaupopulation.size > tailletournoirestant) do
 		
+				0.upto (tailletournoi - 1) do |j|
+					x = rand(0..((@tableaupopulation.size) -1))
+					# ... et je met dans le tournoi un élément au hasard qui viendra se battre avec d'autres
+					tableautournoi[j] = @tableaupopulation[x].copie
+					@tableaupopulation.delete_at(x) 
+				end
 
-			0.upto (tailletournoi - 1) do |j|
-				x = rand(0..((@tableaupopulation.size) -1))
-				# ... et je met dans le tournoi un élément au hasard qui viendra se battre avec d'autres
-				tableautournoi[i].push(@tableaupopulation[x].copie)
-				@tableaupopulation.delete_at(x) #à la fin de la boucle, tableaupopulation ne contient que les outcasts qui seront mutés
+				# A chaque tableau de tournoi, je les classe par score (plus haut score à la fin pour rappel)
+				#tableautournoi.sort_by {|x| x.score}
+				tableautournoi = tableautournoi.sort do |a,b|
+					a.score <=> b.score
+				end
+
+				puts("scores du tournoi classé du plus petit au plus grand")
+
+				0.upto (tailletournoi - 1) do |j|
+					
+					puts(tableautournoi[j].score)
+					 
+				end
+
+				# Et je le met dans le tableau des sélectionnés : le fameux tableau highlander
+				tableauhighlander.push(tableautournoi[tailletournoi -1])
 			end
-
-			# A chaque tableau de tournoi, je les classe par score (plus haut score à la fin pour rappel)
-			tableautournoi[i].sort_by {|x| x.score}
-			# je calcule le nombre de crossover que je fais : c'est un nombre de paires !!!!! donc x paires = x paire d'offsprings
-			nbcrossover = nbpairescrossover *2
-			nboffsprings = nbpairescrossover * 2
-			# qui donneront 2 crossoveré pour 2 offsprijngé 
-			# ceux auquels on ne touchera pas : ceux qui restent en plus des élites du crossover et ceux issus du crossover
-			nbgardes = tailletournoi - nboffsprings - nbcrossover
-
-			#ne sont pas retenus les y correspondants aux y offsprings
-			0.upto((nboffsprings) -1) do |j|
-				tableautournoi[i].delete_at(0)
+			# On s'occupe en dernier de ceux en trop
+			if (tailletournoirestant > 0)
+				@tableaupopulation.sort_by {|x| x.score}
+				# En mettant le meilleur dans le tableau des sélectionnés
+				tableauhighlander.push(@tableaupopulation[tailletournoirestant -1])
 			end
-
-            # je garde la majorité
-			0.upto((nbgardes) -1) do |j|
-				tableaupopulationresultat.push(tableautournoi[i][0].copie)
-				tableautournoi[i].delete_at(0)
+			# On a tout nos sélectionnés : 
+			# Je répartie selon le pourcentage - pour rappel, ils sont déjà répartis au hasard. 
+			nbmutations = ((tableauhighlander.size)*pourcentagemutation)/100
+			nbcopies = ((tableauhighlander.size)*pourcentagecopie)/100
+			nbcrossmatch = (tableauhighlander.size) - nbmutations - nbcopies
+			# Je m'assure de n'avoir que des paires pour le crossmatch
+			if ((nbcrossmatch%2) != 0)
+				nbcopies += 1
+				nbcrossmatch -=1
 			end
-
-			# je crossover les x% les meilleurs
-			j = 0
-			while (j < ((tableautournoi[i].size) -1)) do
-				p1 = tableautournoi[i][j].copie
-				j+=1
-				p2 = tableautournoi[i][j].copie
+			# je fais les mutations
+			0.upto((nbmutations) -1) do |j|
+				p1 = tableauhighlander[0].copie
+				tableauhighlander.delete_at(0)
+				p1.mutation(@profondeur,Population.operateurs,Population.terminaux)
 				tableaupopulationresultat.push(p1)
-				tableaupopulationresultat.push(p2)
-				tprog = p1.crossmatch(p2)
-				tableaupopulationresultat.push(tprog[0])
-				tableaupopulationresultat.push(tprog[1])
-				j+=1
-			end	
+			end
+			# je fais les copies
+			0.upto((nbcopies) -1) do |j|
+				tableaupopulationresultat.push(tableauhighlander[0].copie)
+				tableauhighlander.delete_at(0)
+			end
+			# je fais les cross-over : sachant qu'il n'y a que des paires, i va aller de 0 à nb crossover / 2
+			subCrossmatch(tableauhighlander,tableaupopulationresultat)
+			#à partir de là, il peut y avoir, selon la taille du tournoi , la population diminue de taille
+			#penser à bien diminuer le nombre runs puisque la population deviendra trop petite., se recopiera et mutera uniquement.
+			#bien que s'il n'en reste que deux, on pourrait systématiquement les croiser entre eux
 		end
 		
-		puts("Taille du tableau de resultat : " + String(tableaupopulationresultat.size))
-		# Je mute ceux qui n'ont pas été sélectionnés dans un tournoi
-		0.upto ((@tableaupopulation.size) -1) do |i|
-			@tableaupopulation[i].mutation(@profondeur,Population.operateurs,Population.terminaux)
-		end
-
+		@tableaupopulation = []
+		# je recopie la population
 		0.upto ((tableaupopulationresultat.size) - 1) do |i|
 			@tableaupopulation.push(tableaupopulationresultat[i].copie)
 		end
+
+		Population.ecrireTaillePopu(@tableaupopulation.size)
 
 	end
 
@@ -203,7 +248,7 @@ class Population
 	def genererPopulation(mode)
 		case mode
 		when 't'	#mode tournoi#
-			genererPopulationTournoi(20,4)
+			genererPopulationTournoi(4,80,10,10)
 		when 'e' #mode elite#
 			puts("modeelite")
 		when 'p'
