@@ -247,7 +247,7 @@ def genererPopulationTournoi(tailletournoi,pourcentagecrossmatch,pourcentagemuta
 	# A n>1, on génère en fonction de règles bien précises (tournoi, sélection, random)
 	def genererPopulation(mode)
 		case mode
-		when 't'	#mode tournoi#
+		when 't'	#mode tournoi# : taille tournoi, pourcentage crossmatch, pourcentage mutation, pourcentage copie
 			genererPopulationTournoi(4,80,10,10)
 		when 'e' #mode elite#
 			puts("modeelite")
@@ -276,7 +276,8 @@ def genererPopulationTournoi(tailletournoi,pourcentagecrossmatch,pourcentagemuta
 		fichier.puts("------------------------------------")
 		fichier.puts("-----No more generations after------")
 		fichier.puts("-----'Cause we got the one----------")
-		@tableaupopulation[0].ecrireFichierResultat(fichier)
+		n = (@tableaupopulation.size) -1 #on prend le dernier : le meilleur
+		@tableaupopulation[n].ecrireFichierResultat(fichier)
 	end
 	
 	def sauveLElu(fichier)

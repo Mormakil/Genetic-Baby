@@ -117,13 +117,13 @@ class Programme
 		if res == respatient
 			increasePatientOk
 		else
-			if res > respatient #faux positif
+			if res == true #faux positif
 				increaseFauxPositifs
 			else
 				increaseFauxNegatifs
 			end
 		end
-		return (res - respatient)**2 #optionnel run Gauss
+		return res ^ respatient #optionnel run Gauss / pour baby, faire res and respatient
 	end
 
 ###### Applique la fonction créée dans l'arbre sur les paramètres données par le patient #########
@@ -137,7 +137,7 @@ class Programme
 
 ####### Pour chaque patient d'un tableau, applique la fonction, stocke le résultat et affirme si les deux résultats sont égaux ########	
 	def EvaluerLesPatients(tabpatient)
-		ecartpatient = 0
+		#ecartpatient = 0
 		n = (tabpatient.size) - 1
 		s = @arbre.parser
 		puts(s)
@@ -147,12 +147,13 @@ class Programme
 			rescue ZeroDivisionError
 				resultat = 0
 			end
-			ecartpatient += comparerResultats(resultat,tabpatient[i].resultat)
+			comparerResultats(resultat,tabpatient[i].resultat)
+			#ecartpatient += comparerResultats(resultat,tabpatient[i].resultat)
 			@resultats.push(resultat)
 			i += 1
 			increasePatientTestes
 		end
-		@erreurrms = Math.sqrt(ecartpatient.to_f / n.to_f) #optionnel run Gauss
+		#@erreurrms = Math.sqrt(ecartpatient.to_f / n.to_f) #optionnel run Gauss
 	end
 
 ####### Permet d'appliquer la fonction fitness au programme et de donner le score du programma ######	

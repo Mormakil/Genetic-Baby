@@ -232,7 +232,7 @@ class Tree
                case operateurs.tableau[n].combien
                when 1
                     arbre.ajouterFils(nil)
-                    Tree.genererArbreIncomplet(maprofondeur,operateurs,terminaux,arbre.accesFils(i))
+                    Tree.genererArbreIncomplet(maprofondeur,operateurs,terminaux,arbre.accesFils(0))
                when 2
                     arbre.ajouterFils(nil)
                     arbre.ajouterFils(nil)
@@ -288,37 +288,6 @@ class Tree
           #remplacer ce noeud par celui créer lors de la mutation.
           rechercherEtRemplacerNoeud(noeuddetermine,nouvellemutation)
      end
-
-=begin
-     def muter(profondeurmax,operateurs,terminaux)
-
-          # Décider de où muter
-          ouca = rand(1..nombrelElements)
-
-          # se rendre à l'élément en parcours main gauche
-          t = parcoursMainGauche(ouca,nil)
-          elt = t[1]
-          pos = 1 + ((self.profondeur) - (elt.profondeur))
-          # Puis créer une branche à greffer ni trop grande ni trop petite
-          puts("notre profondeur : ")
-          puts(self.profondeur)
-          puts(elt.profondeur)
-          puts(pos)
-          puts(profondeurmax - pos)
-          profondeurbranche = rand(1..((profondeurmax - pos) + 1))
-          i = rand(1..2) # au hasard, branche complete ou incomplete
-          branche = Tree.new(nil)
-          if ((i % 2) == 0)
-               Tree.genererArbreComplet(profondeurbranche,operateurs,terminaux,branche)
-          else
-               Tree.genererArbreIncomplet(profondeurbranche,operateurs,terminaux,branche)
-          end
-          # ok, on a une branche prête à être greffée
-          # maintenant il faut parcourir l'arbre pour aller se mettre à la profondeur requise
-          # et appliquer la greffe
-          parcoursMainGauche(ouca,nil,branche)
-     end
-=end
 
      # problème ici
      # 1) s'assurer du crossover sur un noeud

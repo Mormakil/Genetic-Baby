@@ -17,7 +17,7 @@ Population.terminaux.afficherValeurs(STDOUT)
 # Une base de patients prêts à être passé en paramètre des différents          ####
 # programmes composant la population pour évaluer le meilleure d'entre eux     ####
 ###################################################################################
-tabpatient = Patient.lireCsv("patients4.csv")
+tabpatient = Patient.lireCsv("patient15j7.csv")
 Population.ecrire_nbpatients(tabpatient.size)
 ####################################################################################
 

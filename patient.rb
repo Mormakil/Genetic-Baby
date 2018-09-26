@@ -7,11 +7,45 @@ class Patient
 	
 	####### 1 : les attributs, pour lire les données du patient #######
 	######## On ne modifie pas le données d'un patient          #######
-	attr_reader :id
+	attr_reader :age
+	attr_reader :poids
+	attr_reader :sexe
+	attr_reader :gemellite
+	attr_reader :cardiopathie
+	attr_reader :malfo
+	attr_reader :rciu
+	attr_reader :outborn
+	attr_reader :cure
+	attr_reader :cesarienne
+	attr_reader :apgar
+	attr_reader :amines
+	attr_reader :respi
+	attr_reader :neuro
+	attr_reader :chorio
+	attr_reader :crp
+	attr_reader :hemoc
+	attr_reader :coag
 	attr_reader :resultat
 	
-	def initialize (id,result)
-		@id = id
+	def initialize (age,poids,sexe,gemellite,cardiopathie,malfo,rciu,outborn,cure,cesarienne,apgar,amines,respi,neuro,chorio,crp,hemoc,coag,result)
+		@age = age
+		@poids = poids
+		@sexe = sexe
+		@gemellite = gemellite
+		@cardiopathie = cardiopathie
+		@malfo = malfo
+		@rciu = rciu
+		@outborn = outborn
+		@cure = cure
+		@cesarienne = cesarienne
+		@apgar = apgar
+		@amines = amines
+		@respi = respi
+		@neuro = neuro
+		@chorio = chorio
+		@crp = crp
+		@hemoc = hemoc
+		@coag = coag
 		@resultat = result
 	end
 	
@@ -33,7 +67,7 @@ class Patient
 			
 			CSV.foreach(chemin,{ encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all}) do |row|
 				monhash = row.to_hash # il est bon, mon hash
-				tabpatient.push(Patient.new(monhash[:id],monhash[:resultat]))
+				tabpatient.push(Patient.new(monhash[:age],monhash[:poids],monhash[:sexe],monhash[:gemellite],monhash[:cardiopathie],monhash[:malfo],monhash[:rciu],monhash[:outborn],monhash[:cure],monhash[:cesarienne],monhash[:apgar],monhash[:amines],monhash[:respi],monhash[:neuro],monhash[:chorio],monhash[:crp],monhash[:hemoc],monhash[:coag],monhash[:deces]))
 			end
 			
 			puts(chemin)
@@ -45,7 +79,7 @@ class Patient
 			puts "we create random patients \n"
 			tabpatient = Array.new(100)
 			0.upto 99 do |i|
-				tabpatient[i] = Patient.new(i,1)
+				tabpatient[i] = Patient.new(i,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false)
 				i += 1
 			end
 		end
